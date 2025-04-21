@@ -9,7 +9,7 @@
 ### 📚 Taula de continguts
 
 - [📖 Descripció del projecte](#descripció-del-projecte)
-- [✨ Característiques principals]()
+- [🧠 Característiques principals]()
 - [🧱 Arquitectura del sistema]()
 - [🧪 Tests]()
 - [🙌 Autors]()

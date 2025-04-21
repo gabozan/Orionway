@@ -12,7 +12,7 @@
 - [✨ Característiques principals]()
 - [🧱 Arquitectura del sistema]()
 - [🧪 Tests]()
-- [🙌 Autoria i crèdits]()
+- [🙌 Autors]()
 - [📄 Llicència]()
 
 ---

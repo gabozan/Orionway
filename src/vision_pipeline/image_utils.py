@@ -38,4 +38,6 @@ def save_image(path: Union[str, Path], img: np.ndarray):
     Retorna:
         None
     """
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(path), img)

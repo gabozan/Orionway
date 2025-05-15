@@ -3,3 +3,10 @@
 #                                    OrionWay - Robótica, Llenguatge i Planificació                                    #
 #                                                                                                                      #
 ########################################################################################################################
+
+from .google_tts import generate_audio, play_audio
+
+__all__ = [
+    "generate_audio",
+    "play_audio"
+]

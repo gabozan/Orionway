@@ -1,38 +1,55 @@
-const int LED = 4;
-const int BUTTON = 3;
-bool actual = HIGH;
-bool last = HIGH;
+typedef enum RobotState {
+  ATURAT,
+  RECONEIX,
+  AVANÇA,
+  PETICIÓ,
+  ZEBRA_ESPERA,
+  ZEBRA_UBICA,
+  ZEBRA_AVANÇA,
+  APROPAMENT
+};
+
+RobotState estat = ATURAT;
 
 void setup()
 {
-  Serial.begin(115200);
-  pinMode(LED, OUTPUT);
-  pinMode(BUTTON, INPUT_PULLUP);
+  initButtons();
+  initRaspberryIO();
 }
 
 void loop()
 {
-  actual = digitalRead(BUTTON);
+  unsigned long currentTime = millis();
+  switch (estat){  
+    case ATURAT:
 
-  if (last == HIGH && actual == LOW)
-  {
-    Serial.println(1);
-  }
+      // Dos cops de mans
+      if(getTaps())
+      {
+        estat = APROPAMENT;
+        break;
+      }
 
-  last = actual;
+      // Pulsació al botó central (una o dues vegades)
+      ButtonEvent button = getButtons(currentTime);
+      switch (button){
+        case BUTTON1_SINGLE_CLICK:
+          estat = AVANÇA;
+          break;
+        case BUTTON1_DOUBLE_CLICK:
+          estat = RECONEIX;
+          sendToRaspberry(RECONEIX);
+          break;
+      }
 
-  if (Serial.available())
-  {
-    int input = Serial.read() - '0';
-
-    switch (input)
-    {
-    case 0:
-      digitalWrite(LED, LOW);
       break;
-    case 1:
-      digitalWrite(LED, HIGH);
-      break;
-    }
+    case RECONEIX:
+
+      // La Raspberry retorna el mateix codi = Ha acabat correctament
+      if(readFromRaspberry() == RECONEIX)
+      {
+        estat = ATURAT;
+      }
+    break;
   }
 }

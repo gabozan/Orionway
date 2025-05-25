@@ -2,6 +2,7 @@ typedef enum RobotState {
   ATURAT,
   RECONEIX,
   AVANÇA,
+  GIRA,
   PETICIÓ,
   ZEBRA_ESPERA,
   ZEBRA_UBICA,
@@ -15,13 +16,22 @@ void setup()
 {
   initButtons();
   initRaspberryIO();
+  initMotors();
 }
 
 void loop()
 {
   unsigned long currentTime = millis();
-  switch (estat){  
+  switch (estat){
+
+    //=====================//
+    //       ATURAT        //
+    //=====================//
     case ATURAT:
+      //--------------[ ACCIONS ]--------------
+      stopMotors();
+
+      //-----------[ CANVIS D'ESTAT ]----------
 
       // Dos cops de mans
       if(getTaps())
@@ -43,13 +53,19 @@ void loop()
       }
 
       break;
+
+    //=====================//
+    //      RECONEIX       //
+    //=====================//
     case RECONEIX:
+
+      //-----------[ CANVIS D'ESTAT ]----------
 
       // La Raspberry retorna el mateix codi = Ha acabat correctament
       if(readFromRaspberry() == RECONEIX)
       {
         estat = ATURAT;
       }
-    break;
+      break;
   }
 }

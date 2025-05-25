@@ -16,9 +16,6 @@ const float d = 5; // cm : Distància entre el centre i una roda
 const uint8_t linealPWM = 255 * linealSpeed/(V_bat*K_v*r);
 const uint8_t turningPWM = 255 * (d*turningSpeed)/(V_bat*K_v*r);
 
-unsigned long rotateStart = 0;
-unsigned long rotateDuration = 0;
-
 void initMotors(){
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);

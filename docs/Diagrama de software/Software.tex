@@ -194,27 +194,52 @@
 \begin{tikzpicture}[
 	state/.style={ellipse, draw, minimum width=2.5cm, minimum height=1.2cm, align=center},
 	every node/.style={font=\sffamily},
+	node distance=2.5cm and 3.5cm,
 	->, >=Stealth
 	]
 	
 	% Nodes
-	\node[state] (apro) {Apropament\\automàtic};
-	\node[state, below=of apro] (aturat) {Aturat};
-	\node[state, below left=1cm and 1cm of aturat] (reconeixement) {Reconeixement\\d'objecte};
-	\node[state, below right=of aturat] (navegacio) {Navegació};
-	\node[state, right=of navegacio] (ubicacio) {Ubicació en\\pas de zebra};
-	\node[state, above=of navegacio] (espera) {Espera};
+	\node[state] (reconeix) {RECONEIX};
+	\node[state, below=of reconeix] (aturat) {ATURAT};
+	\node[state, right=of aturat] (avanca) {AVANÇA};
+	\node[state, below=of aturat] (apropament) {APROPAMENT};
+	\node[state, above=of avanca] (peticio) {PETICIÓ};
+	\node[state, right=of avanca] (zubica) {ZEBRA\\UBICA};
+	\node[state, below=of zubica] (zespera) {ZEBRA\\ESPERA};
+	\node[state, below=of zespera] (zavanca) {ZEBRA\\AVANÇA};
+	\node[state, right=of peticio] (girar) {GIRA};
 	
-	% Arrows
-	\draw (apro) -- (aturat);
-	\draw (aturat) to[bend left] (apro);
-	\draw (aturat) -- (navegacio);
-	\draw (navegacio) -- (aturat);
-	\draw (aturat) -- (reconeixement);
-	\draw (reconeixement) -- (aturat);
-	\draw (navegacio) -- (ubicacio);
-	\draw (ubicacio) -- (espera);
-	\draw (espera) -- (navegacio);
+	% Arrows from RECONEX
+	\draw [bend left=20] (reconeix) to node[right] {end} (aturat);
+	
+	% Arrows from ATURAT
+	\draw (aturat) -- node[above] {1 click mig} (avanca);
+	\draw [bend left=20] (aturat) to node[left] {2 clicks mig} (reconeix);
+	\draw[bend left=20] (aturat) to node[right] {cops de mà} (apropament);
+	
+	% Arrows from APROPAMENT
+	\draw[bend left=20] (apropament) to node[left] {end} (aturat);
+	
+	% Arrows from AVANÇA
+	\draw[bend left=10] (avanca) to node[left] {ultrasons} (girar);
+	\draw (avanca) -- node[left] {botons laterals} (peticio);
+	\draw (avanca) -- node[right, above] {2 clicks mig} (reconeix);
+	\draw (avanca) -- node[above] {detecció zebra} (zubica);
+	
+	% Arrows from ZEBRA UBICA
+	\draw (zubica) -- node[right] {end} (zespera);
+	
+	% Arrows from ZEBRA ESPERA
+	\draw (zespera) -- node[right] {end} (zavanca);
+	
+	% Arrows from ZEBRA AVANCA
+	\draw (zavanca) -- node[left] {end} (avanca);
+	
+	% Arrows from PETICIÓ
+	\draw (peticio) --  node[below] {end} (girar);
+	
+	% Arrows from GIRA
+	\draw[bend left=10] (girar) to node[right] {end} (avanca);
 	
 \end{tikzpicture}
 

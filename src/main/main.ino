@@ -11,9 +11,13 @@ typedef enum RobotState {
 };
 
 RobotState estat = ATURAT;
+bool objectesDetectats[3];
+ButtonEvent button = BUTTON_NONE;
+bool turnLeft = false;
 
 void setup()
 {
+  initDistancies();
   initButtons();
   initRaspberryIO();
   initMotors();
@@ -41,7 +45,7 @@ void loop()
       }
 
       // Pulsació al botó central (una o dues vegades)
-      ButtonEvent button = getButtons(currentTime);
+      button = getButtons(currentTime);
       switch (button){
         case BUTTON1_SINGLE_CLICK:
           estat = AVANÇA;
@@ -65,6 +69,26 @@ void loop()
       if(readFromRaspberry() == RECONEIX)
       {
         estat = ATURAT;
+      }
+      break;
+
+    //=====================//
+    //      PETICIÓ       //
+    //=====================//
+    case PETICIÓ:
+      RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANÇA ja es fa i no fa falta repetir-ho
+
+      //-----------[ CANVIS D'ESTAT ]----------
+
+      // Si no es detecten obstacles en la direcció de la petició
+      if((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))
+      {
+        turnLeft = button == BUTTON0_LONG_PRESS;
+        estat = GIRA;
+      }
+      else
+      {
+        estat = AVANÇA;
       }
       break;
   }

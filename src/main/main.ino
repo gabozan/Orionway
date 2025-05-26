@@ -13,7 +13,8 @@ typedef enum RobotState {
 RobotState estat = ATURAT;
 bool objectesDetectats[3];
 ButtonEvent button = BUTTON_NONE;
-bool turnLeft = false;
+RobotState giraSegüent = ATURAT;
+float angle=0;
 
 void setup()
 {
@@ -69,6 +70,7 @@ void loop()
       if(readFromRaspberry() == RECONEIX)
       {
         estat = ATURAT;
+        break;
       }
       break;
 
@@ -83,13 +85,25 @@ void loop()
       // Si no es detecten obstacles en la direcció de la petició
       if((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))
       {
-        turnLeft = button == BUTTON0_LONG_PRESS;
+        angle = button == BUTTON0_LONG_PRESS? -90.0 : 90.0;
         estat = GIRA;
+        giraSegüent = AVANÇA;
+        break;
       }
       else
       {
         estat = AVANÇA;
+        break;
       }
+      break;
+
+    
+    //=====================//
+    //        GIRA         //
+    //=====================//
+    case GIRA:
+      rotate(angle);
+      estat = giraSegüent;
       break;
   }
 }

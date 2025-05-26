@@ -6,7 +6,7 @@
 
 from translations import CLASS_TRANSLATIONS
 from ultralytics.engine.results import Results
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import numpy as np
 
 # ==================================================================================================================== #
@@ -45,3 +45,33 @@ def calculate_class_center(results: Results, image: np.ndarray) -> List[Dict]:
         })
     detections.sort(key=lambda d: d["distance"])
     return detections
+
+
+def analyze_person(results: Results, image: np.ndarray) -> Tuple[bool, float, bool]:
+    """
+    Analitza si s'ha detectat una persona a la imatge i extreu informació rellevant.
+
+    Paràmetres:
+        results (Results): Resultats de la inferència del model YOLO.
+        image (np.ndarray): Imatge original en format BGR.
+
+    Retorna:
+        (bool, float, bool):
+            - Detecció de persona (True/False),
+            - Desviació horitzontal respecte al centre de la imatge (en píxels),
+            - True si la persona ocupa més del 50% de la superfície de la imatge (indicador de proximitat).
+    """
+    h, w = image.shape[:2]
+    cx = w / 2
+
+    for r in results:
+        for box in r.boxes:
+            if int(box.cls[0]) == 0:
+                x1, y1, x2, y2 = box.xyxy[0].tolist()
+                box_x = (x1 + x2) / 2
+                x_deviation = box_x - cx
+                box_w, box_h = x2 - x1, y2 - y1
+                area_ratio = (box_w * box_h) / (w * h)
+                big_person = area_ratio >= 0.7
+                return True, x_deviation, big_person
+    return False, np.inf, False

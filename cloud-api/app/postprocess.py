@@ -75,3 +75,23 @@ def analyze_person(results: Results, image: np.ndarray) -> Tuple[bool, float, bo
                 big_person = area_ratio >= 0.7
                 return True, x_deviation, big_person
     return False, np.inf, False
+
+
+def analyze_crosswalk_and_traffic_lights(results) -> List[bool]:
+    """
+    Analitza la presència de pas de vianants i semàfors vermell i verd.
+
+    Classe 0: Pas de vianants
+    Classe 1: Semàfor vermell
+    Classe 2: Semàfor verd
+
+    Retorna:
+        List[bool]: [hi_ha_pas_de_vianants, hi_ha_sem_vermell, hi_ha_sem_verd]
+    """
+    detected = [False, False, False]
+    if len(results.xyxy[0]) == 0:
+        return detected
+    for cls in results.xyxy[0][:, 5]:
+        class_index = int(cls)
+        detected[class_index] = True
+    return detected

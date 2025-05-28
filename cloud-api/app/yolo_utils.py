@@ -10,6 +10,7 @@ from ultralytics.engine.results import Results
 import numpy as np
 from pathlib import Path
 from typing import Union
+import torch
 
 # ==================================================================================================================== #
 
@@ -25,6 +26,23 @@ def load_model(path: Union[str, Path]) -> YOLO:
     """
     try:
         return YOLO(str(path))
+    except Exception as e:
+        raise RuntimeError(f"No es pot carregar el model en {path}") from e
+
+
+def load_modelv5(path: Union[str, Path]):
+    """
+    Carrega un model YOLOv5 usant torch.hub des de la ruta especificada.
+
+    Paràmetres:
+        path (str o Path): Ruta cap a l'arxiu del model (.pt).
+
+    Retorna:
+        model: Instància del model carregat amb torch.hub.
+    """
+    try:
+        model = torch.hub.load('../yolov5/', 'custom', path=str(path), source='local')
+        return model
     except Exception as e:
         raise RuntimeError(f"No es pot carregar el model en {path}") from e
 

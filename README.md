@@ -40,7 +40,7 @@ L'arquitectura de software del nostre projecte está formada per:
  * Arduino
  * Python (Control Raspberry Pi)
  * YOLO (Detecció d'objectes)
- * ZebrAI (Projecte Visió per Computador que detectar semàfors i passos de zebra) [Enllaç](https://github.com/albert-ce/ZebrAI-Crossing)
+ * ZebrAI (Projecte Visió per Computador que detectar semàfors i passos de zebra) [GitHub](https://github.com/albert-ce/ZebrAI-Crossing)
 
 Respecte a hardware i components hem utilitzat el següent:
  * Arduino Mega 2560 [Datasheet](https://docs.arduino.cc/resources/datasheets/A000067-datasheet.pdf)

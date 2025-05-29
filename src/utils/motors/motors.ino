@@ -1,53 +1,106 @@
-#define ENA 6
-#define IN1 8
-#define IN2 7
-#define ENB 3
-#define IN3 4
-#define IN4 5
+#include <RotaryEncoder.h>
 
-const float linealSpeed = 100; // cm/s (v)
-const float turningSpeed = 30; // rpm (ω)
+#define LPWM1 7
+#define LPWM2 8
+#define RPWM1 10
+#define RPWM2 9
 
-const float K_v = 100/12; // rpm/V : Speed constant
-const float V_bat = 12; // V : Bateria
-const float r = 4; // cm : Radi de les rodes
-const float d = 5; // cm : Distància entre el centre i una roda
+#define LEFT_CHA 20
+#define LEFT_CHB 19
+#define RIGHT_CHA 2
+#define RIGHT_CHB 3
 
-const uint8_t linealPWM = 255 * linealSpeed/(V_bat*K_v*r);
-const uint8_t turningPWM = 255 * (d*turningSpeed)/(V_bat*K_v*r);
+const long TICKS_PER_REV = 50000;
+const float r = 7.25; // cm
+const float d = 15.0; // cm
+const uint8_t PWM = 100;
 
-void initMotors(){
-  pinMode(ENA, OUTPUT);
-  pinMode(IN1, OUTPUT);
-  pinMode(IN2, OUTPUT);
-  pinMode(ENB, OUTPUT);
-  pinMode(IN3, OUTPUT);
-  pinMode(IN4, OUTPUT);
-  analogWrite(ENA, 0);
-  analogWrite(ENB, 0);
+RotaryEncoder leftEncoder(LEFT_CHA, LEFT_CHB, RotaryEncoder::LatchMode::TWO03);
+RotaryEncoder rightEncoder(RIGHT_CHA, RIGHT_CHB, RotaryEncoder::LatchMode::TWO03);
+
+void leftTick() {
+  leftEncoder.tick();
 }
 
-void setLeft(uint8_t pwm, bool dir)  { analogWrite(ENA, pwm); digitalWrite(IN1, dir);  digitalWrite(IN2, !dir); }
-void setRight(uint8_t pwm, bool dir) { analogWrite(ENB, pwm); digitalWrite(IN3, dir);  digitalWrite(IN4, !dir); }
-
-void moveForward()
-{
-  setLeft(linealPWM, true);
-  setRight(linealPWM, true);
+void rightTick() {
+  rightEncoder.tick();
 }
 
-void stopMotors()
-{
-  setLeft(0, false);
-  setRight(0, false);
-}
-
-void rotate(float angle)
-{
-  setLeft(turningPWM, angle > 0);
-  setRight(turningPWM, angle <= 0);
-  float absAngle = angle > 0 ? angle : -angle;
-  unsigned long rotateDuration = (unsigned long)(absAngle / (2.0 * PI / 60.0 * turningSpeed) * 1000.0);
-  delay(rotateDuration);
+void initMotors() {
+  Serial.begin(115200);
+  delay(200);
+  pinMode(LPWM1, OUTPUT);
+  pinMode(LPWM2, OUTPUT);
+  pinMode(RPWM1, OUTPUT);
+  pinMode(RPWM2, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(LEFT_CHA), leftTick, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(LEFT_CHB), leftTick, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_CHA), rightTick, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(RIGHT_CHB), rightTick, CHANGE);
   stopMotors();
 }
+
+void setLeft(bool dir) {
+  analogWrite(LPWM1, dir ? PWM : 0);
+  analogWrite(LPWM2, dir ? 0 : PWM);
+}
+
+void setRight(bool dir) {
+  analogWrite(RPWM1, dir ? PWM : 0);
+  analogWrite(RPWM2, dir ? 0 : PWM);
+}
+
+void stopMotors() {
+  analogWrite(LPWM1, 0);
+  analogWrite(LPWM2, 0);
+  analogWrite(RPWM1, 0);
+  analogWrite(RPWM2, 0);
+}
+
+void resetEncoders() {
+  leftEncoder.setPosition(0);
+  rightEncoder.setPosition(0);
+}
+
+long getLeftTicks() {
+  return abs(leftEncoder.getPosition());
+}
+
+long getRightTicks() {
+  return abs(rightEncoder.getPosition());
+}
+
+void rotate(float angleRad) {
+  resetEncoders();
+
+  double arcLength = fabs(angleRad) * d * 2;
+  double wheelCircumference = 2.0 * PI * r;
+  double wheelRotations = arcLength / wheelCircumference;
+  long targetTicks = (long)(wheelRotations * TICKS_PER_REV);
+
+  bool rotateLeft = angleRad > 0;
+  setLeft(rotateLeft);
+  setRight(!rotateLeft);
+
+  while (getLeftTicks() < targetTicks && getRightTicks() < targetTicks) {
+    long left = getLeftTicks();
+    long right = getRightTicks();
+
+    Serial.print("Target: ");
+    Serial.print(targetTicks);
+    Serial.print(" | L: ");
+    Serial.print(left);
+    Serial.print(" | R: ");
+    Serial.println(right);
+
+    delay(50);
+  }
+
+  stopMotors();
+
+  Serial.print("Final L: ");
+  Serial.print(getLeftTicks());
+  Serial.print(" | Final R: ");
+  Serial.println(getRightTicks());
+}
+

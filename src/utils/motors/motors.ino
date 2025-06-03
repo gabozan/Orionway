@@ -18,15 +18,18 @@ const uint8_t PWM = 100;
 RotaryEncoder leftEncoder(LEFT_CHA, LEFT_CHB, RotaryEncoder::LatchMode::TWO03);
 RotaryEncoder rightEncoder(RIGHT_CHA, RIGHT_CHB, RotaryEncoder::LatchMode::TWO03);
 
-void leftTick() {
+void leftTick()
+{
   leftEncoder.tick();
 }
 
-void rightTick() {
+void rightTick()
+{
   rightEncoder.tick();
 }
 
-void initMotors() {
+void initMotors()
+{
   Serial.begin(115200);
   delay(200);
   pinMode(LPWM1, OUTPUT);
@@ -40,37 +43,50 @@ void initMotors() {
   stopMotors();
 }
 
-void setLeft(bool dir) {
+void setLeft(bool dir)
+{
   analogWrite(LPWM1, dir ? PWM : 0);
   analogWrite(LPWM2, dir ? 0 : PWM);
 }
 
-void setRight(bool dir) {
+void setRight(bool dir)
+{
   analogWrite(RPWM1, dir ? PWM : 0);
   analogWrite(RPWM2, dir ? 0 : PWM);
 }
 
-void stopMotors() {
+void moveForward()
+{
+  setLeft(true);
+  setRight(true);
+}
+
+void stopMotors()
+{
   analogWrite(LPWM1, 0);
   analogWrite(LPWM2, 0);
   analogWrite(RPWM1, 0);
   analogWrite(RPWM2, 0);
 }
 
-void resetEncoders() {
+void resetEncoders()
+{
   leftEncoder.setPosition(0);
   rightEncoder.setPosition(0);
 }
 
-long getLeftTicks() {
+long getLeftTicks()
+{
   return abs(leftEncoder.getPosition());
 }
 
-long getRightTicks() {
+long getRightTicks()
+{
   return abs(rightEncoder.getPosition());
 }
 
-void rotate(float angleRad) {
+void rotate(float angleRad)
+{
   resetEncoders();
 
   double arcLength = fabs(angleRad) * d * 2;
@@ -82,7 +98,8 @@ void rotate(float angleRad) {
   setLeft(rotateLeft);
   setRight(!rotateLeft);
 
-  while (getLeftTicks() < targetTicks && getRightTicks() < targetTicks) {
+  while (getLeftTicks() < targetTicks && getRightTicks() < targetTicks)
+  {
     long left = getLeftTicks();
     long right = getRightTicks();
 
@@ -103,4 +120,3 @@ void rotate(float angleRad) {
   Serial.print(" | Final R: ");
   Serial.println(getRightTicks());
 }
-

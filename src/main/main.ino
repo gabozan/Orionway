@@ -75,12 +75,44 @@ void loop()
       break;
 
     //=====================//
+    //       AVANÇA        //
+    //=====================//
+    case AVANÇA:
+      //--------------[ ACCIONS ]--------------
+      moveForward();
+
+      //-----------[ CANVIS D'ESTAT ]----------
+      // Detectar parets davant
+      RevisaObstacles(objectesDetectats);
+      if(objectesDetectats[1])
+      {
+        angle = objectesDetectats[2]? -90.0 : 90.0;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'aver gir 180º)
+        estat = GIRA;
+        giraSegüent = AVANÇA;
+        break;
+      }
+
+      // Pulsació al botó central (una o dues vegades)
+      button = getButtons(currentTime);
+      switch (button){
+        case BUTTON0_LONG_PRESS:
+        case BUTTON2_LONG_PRESS:
+          estat = PETICIÓ;
+          break;
+        case BUTTON1_DOUBLE_CLICK:
+          estat = RECONEIX;
+          sendToRaspberry(RECONEIX);
+          break;
+      }
+
+      break;
+
+    //=====================//
     //      PETICIÓ       //
     //=====================//
     case PETICIÓ:
-      RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANÇA ja es fa i no fa falta repetir-ho
-
       //-----------[ CANVIS D'ESTAT ]----------
+      RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANÇA ja es fa i no fa falta repetir-ho
 
       // Si no es detecten obstacles en la direcció de la petició
       if((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))

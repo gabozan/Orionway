@@ -15,6 +15,7 @@ bool objectesDetectats[3];
 ButtonEvent button = BUTTON_NONE;
 RobotState giraSegüent = ATURAT;
 float angle=0;
+int instruccio;
 
 void setup()
 {
@@ -66,8 +67,8 @@ void loop()
 
       //-----------[ CANVIS D'ESTAT ]----------
 
-      // La Raspberry retorna el mateix codi = Ha acabat correctament
-      if(readFromRaspberry() == RECONEIX)
+      // La Raspberry retorna el següent codi = Ha acabat correctament
+      if(readInstructionFromRaspberry() == ATURAT)
       {
         estat = ATURAT;
         break;
@@ -101,7 +102,15 @@ void loop()
           break;
         case BUTTON1_DOUBLE_CLICK:
           estat = RECONEIX;
-          sendToRaspberry(RECONEIX);
+          sendInstructionToRaspberry(RECONEIX);
+          break;
+      }
+
+      // Reconeixement de pas de zebra
+      instruccio = readInstructionFromRaspberry();
+      if (instruccio == ZEBRA_UBICA)
+      {
+          estat = ZEBRA_UBICA;
           break;
       }
 
@@ -136,6 +145,61 @@ void loop()
     case GIRA:
       rotate(angle);
       estat = giraSegüent;
+      break;
+
+    //========================//
+    //      ZEBRA_UBICA       //
+    //========================//
+    case ZEBRA_UBICA:
+
+      //-----------[ CANVIS D'ESTAT ]----------
+      instruccio = readInstructionFromRaspberry();
+      if (instruccio == ZEBRA_ESPERA)
+      {
+          estat = ZEBRA_ESPERA;
+          break;
+      }
+      break;
+
+    //========================//
+    //      ZEBRA_ESPERA      //
+    //========================//
+    case ZEBRA_ESPERA:
+
+      //-----------[ CANVIS D'ESTAT ]----------
+      instruccio = readInstructionFromRaspberry();
+      if (instruccio == ZEBRA_AVANÇA)
+      {
+          estat = ZEBRA_AVANÇA;
+          break;
+      }
+      break;
+
+    //========================//
+    //      ZEBRA_AVANÇA      //
+    //========================//
+    case ZEBRA_AVANÇA:
+      //--------------[ ACCIONS ]--------------
+      moveForward();
+
+      //-----------[ CANVIS D'ESTAT ]----------
+      instruccio = readInstructionFromRaspberry();
+      if (instruccio == AVANÇA)
+      {
+          estat = AVANÇA;
+          break;
+      }
+      break;
+
+    //========================//
+    //      APROPAMENT        //
+    //========================//
+    case APROPAMENT:
+      //--------------[ ACCIONS ]--------------
+      // TODO
+
+      //-----------[ CANVIS D'ESTAT ]----------
+      // TODO
       break;
   }
 }

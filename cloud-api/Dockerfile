@@ -7,6 +7,9 @@ WORKDIR /app
 COPY requirements.txt ./
 COPY app/ ./
 COPY models/ ./models/
+COPY yolov5/ ./yolov5/
+
+ENV PYTHONPATH="${PYTHONPATH}:/app/yolov5"
 
 RUN pip install --upgrade pip setuptools wheel
 

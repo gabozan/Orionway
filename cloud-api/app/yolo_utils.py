@@ -4,7 +4,7 @@
 #                                                                                                                      #
 ########################################################################################################################
 
-from config import IMAGE_SIZE, DEVICE, CONFIDENCE
+from config import IMAGE_SIZE, DEVICE, CONFIDENCE, BASE_PATH
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 import numpy as np
@@ -41,7 +41,7 @@ def load_modelv5(path: Union[str, Path]):
         model: Instància del model carregat amb torch.hub.
     """
     try:
-        model = torch.hub.load('../yolov5/', 'custom', path=str(path), source='local')
+        model = torch.hub.load(str(BASE_PATH / "yolov5"), 'custom', path=str(path), source='local')
         return model
     except Exception as e:
         raise RuntimeError(f"No es pot carregar el model en {path}") from e

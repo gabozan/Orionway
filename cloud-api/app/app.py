@@ -6,7 +6,7 @@
 
 from flask import Flask, request, jsonify
 from config import MODEL_OBJECT_PERSON_DETECTOR, MODEL_ZEBRAI_DETECTOR
-from image_utils import load_image_from_bytes
+from image_utils import load_image_from_bytes, load_image_from_bytes_v5
 from yolo_utils import load_model, load_modelv5, predict_image
 from postprocess import calculate_class_center, analyze_person, analyze_crosswalk_and_traffic_lights
 
@@ -53,7 +53,7 @@ def detect_zebrai():
         return jsonify({"error": "No s'ha enviat cap imatge"}), 400
 
     file_bytes = request.files["file"].read()
-    image = load_image_from_bytes(file_bytes)
+    image = load_image_from_bytes_v5(file_bytes)
     results = model2(image)
     class_detected = analyze_crosswalk_and_traffic_lights(results)
     return jsonify({

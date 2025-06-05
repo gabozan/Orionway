@@ -8,7 +8,6 @@ from translations import CLASS_TRANSLATIONS
 from ultralytics.engine.results import Results
 from typing import List, Dict, Tuple
 import numpy as np
-import torch
 
 # ==================================================================================================================== #
 
@@ -82,26 +81,21 @@ def analyze_crosswalk_and_traffic_lights(results) -> List[bool]:
     """
     Analitza la presència de pas de vianants i semàfors vermell i verd.
 
-    Classe 0: Pas de vianants
-    Classe 1: Semàfor vermell
-    Classe 2: Semàfor verd
+    - "Zebra_Cross" -> detecta pas de vianants
+    - "R_Signal" -> detecta semàfor vermell
+    - "G_Signal" -> detecta semàfor verd
 
     Retorna:
         List[bool]: [hi_ha_pas_de_vianants, hi_ha_sem_vermell, hi_ha_sem_verd]
     """
     detected = [False, False, False]
-    detections = results[0]
-    if detections is None or len(detections) == 0:
-        return detected
-    for det in detections:
-        class_tensor = det[5]
-        if isinstance(class_tensor, torch.Tensor):
-            if class_tensor.numel() == 1:
-                class_index = int(class_tensor.item())
-            else:
-                class_index = int(class_tensor.cpu().numpy().flatten()[0])
-        else:
-            class_index = int(class_tensor)
-        if 0 <= class_index <= 2:
-            detected[class_index] = True
+    names = results.pandas().xyxy[0]['name'].tolist()
+    print(names)
+    for name in names:
+        if name == "Zebra_Cross":
+            detected[0] = True
+        elif name == "R_Signal":
+            detected[1] = True
+        elif name == "G_Signal":
+            detected[2] = True
     return detected

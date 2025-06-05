@@ -7,6 +7,7 @@
 from config import IMAGE_SIZE, DEVICE, CONFIDENCE, BASE_PATH
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
+from yolov5.models.common import AutoShape
 import numpy as np
 from pathlib import Path
 from typing import Union
@@ -42,6 +43,8 @@ def load_modelv5(path: Union[str, Path]):
     """
     try:
         model = torch.hub.load(str(BASE_PATH / "yolov5"), 'custom', path=str(path), source='local')
+        model.eval()
+        model = AutoShape(model)
         return model
     except Exception as e:
         raise RuntimeError(f"No es pot carregar el model en {path}") from e

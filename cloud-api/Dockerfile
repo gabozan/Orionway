@@ -4,10 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-COPY requirements.txt ./
-COPY app/ ./
-COPY models/ ./models/
-COPY yolov5/ ./yolov5/
+COPY . .
 
 ENV PYTHONPATH="${PYTHONPATH}:/app/yolov5"
 

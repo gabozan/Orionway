@@ -4,9 +4,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-COPY requirements.txt ./
-COPY app/ ./
-COPY models/ ./models/
+COPY . .
+
+ENV PYTHONPATH="${PYTHONPATH}:/app/yolov5"
 
 RUN pip install --upgrade pip setuptools wheel
 

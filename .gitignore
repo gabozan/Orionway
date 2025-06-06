@@ -1,4 +1,4 @@
 .idea
 **/key.json
-raspberry/tts/key.json
+raspberry/audio_utils/key.json
 **/yolov5

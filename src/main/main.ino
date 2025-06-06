@@ -1,5 +1,5 @@
 // ---------------------------------------- buttons_control.ino
-const int buttonPins[3] = {2, 51, 4};
+const int buttonPins[3] = {22, 24, 26};
 int estatActual[3] = {HIGH, HIGH, HIGH};
 int estatAnterior[3] = {HIGH, HIGH, HIGH};
 unsigned long lastPressTime[3] = {0, 0, 0};
@@ -25,8 +25,8 @@ typedef enum
 } ButtonEvent;
 
 // ---------------------------------------- detect_distances.ino
-const int trigPins[3] = {43, 47, 51};
-const int echoPins[3] = {41, 45, 49};
+const int trigPins[3] = {39, 43, 47};
+const int echoPins[3] = {37, 41, 45};
 
 const int thresholds[3] = {40, 40, 40};
 
@@ -44,37 +44,32 @@ const unsigned long timeoutEcho = 30000;
 const unsigned long intervalLectura = 60000;
 unsigned long tempsAnteriorLectura = 0;
 
-// ---------------------------------------- detect_distances.ino
-#define ENA 6
-#define IN1 8
-#define IN2 7
-#define ENB 3
-#define IN3 4
-#define IN4 5
+// ---------------------------------------- motors.ino
+#include <RotaryEncoder.h>
 
-const float linealSpeed = 100; // cm/s (v)
-const float turningSpeed = 30; // rpm (ω)
+#define LPWM1 7
+#define LPWM2 8
+#define RPWM1 10
+#define RPWM2 9
 
-const float K_vL = 100.0 / 12.0; // rpm/V per al motor esquerre
-const float K_vR = 100.0 / 12.0;  // rpm/V per al motor dret
+#define LEFT_CHA 20
+#define LEFT_CHB 19
+#define RIGHT_CHA 2
+#define RIGHT_CHB 3
 
-const float V_bat = 12; // V : Bateria
-const float r = 4; // cm : Radi de les rodes
-const float d = 5; // cm : Distància entre el centre i una roda
+const long TICKS_PER_REV = 50000;
+const float r = 7.25; // cm
+const float d = 15.0; // cm
+const uint8_t PWM = 100;
 
-// PWM per moviment lineal
-const uint8_t linealPWML = 255 * linealSpeed / (V_bat * K_vL * r);
-const uint8_t linealPWMR = 255 * linealSpeed / (V_bat * K_vR * r);
-
-// PWM per gir
-const uint8_t turningPWML = 255 * (d * turningSpeed) / (V_bat * K_vL * r);
-const uint8_t turningPWMR = 255 * (d * turningSpeed) / (V_bat * K_vR * r);
+RotaryEncoder leftEncoder(LEFT_CHA, LEFT_CHB, RotaryEncoder::LatchMode::TWO03);
+RotaryEncoder rightEncoder(RIGHT_CHA, RIGHT_CHB, RotaryEncoder::LatchMode::TWO03);
 
 void RevisaObstacles(bool (&objectesDetectats)[3]);
 
 // ---------------------------------------- detect_clap.ino
 const int micPin = A0;
-const int soundThreshold = 800;
+const int soundThreshold = 50;
 const unsigned long minTimeGap = 200;
 const unsigned long maxTimeGap = 500;
 unsigned long previousTapTime = 0;
@@ -110,6 +105,15 @@ void setup()
 void loop()
 {
   unsigned long currentTime = millis();
+  button = getButtons();
+  RevisaObstacles(objectesDetectats);
+  Serial.println(
+    String("\rEstat: ") + estat +
+    " | Button: " + button +
+    " | Front: " + objectesDetectats[0] +
+    " | Left: " + objectesDetectats[1] +
+    " | Right: " + objectesDetectats[2]
+  );
   switch (estat){
 
     //=====================//
@@ -129,10 +133,10 @@ void loop()
       }
 
       // Pulsació al botó central (una o dues vegades)
-      button = getButtons(currentTime);
       switch (button){
         case BUTTON1_SINGLE_CLICK:
           estat = AVANCA;
+          moveForward();
           break;
         case BUTTON1_DOUBLE_CLICK:
           estat = RECONEIX;
@@ -162,11 +166,11 @@ void loop()
     //=====================//
     case AVANCA:
       //--------------[ ACCIONS ]--------------
-      moveForward();
+      //moveForward();
 
       //-----------[ CANVIS D'ESTAT ]----------
       // Detectar parets davant
-      RevisaObstacles(objectesDetectats);
+      // RevisaObstacles(objectesDetectats);
       if(objectesDetectats[1])
       {
         angle = objectesDetectats[2]? -90.0 : 90.0;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'aver gir 180º)
@@ -176,11 +180,13 @@ void loop()
       }
 
       // Pulsació al botó central (una o dues vegades)
-      button = getButtons(currentTime);
       switch (button){
         case BUTTON0_LONG_PRESS:
         case BUTTON2_LONG_PRESS:
           estat = PETICIO;
+          break;
+        case BUTTON1_SINGLE_CLICK:
+          estat = ATURAT;
           break;
         case BUTTON1_DOUBLE_CLICK:
           estat = RECONEIX;
@@ -203,7 +209,7 @@ void loop()
     //=====================//
     case PETICIO:
       //-----------[ CANVIS D'ESTAT ]----------
-      RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANCA ja es fa i no fa falta repetir-ho
+      // RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANCA ja es fa i no fa falta repetir-ho
 
       // Si no es detecten obstacles en la direcció de la PETICIO
       if((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))
@@ -216,6 +222,7 @@ void loop()
       else
       {
         estat = AVANCA;
+        moveForward();
         break;
       }
       break;
@@ -253,6 +260,7 @@ void loop()
       if (instruccio == ZEBRA_AVANCA)
       {
           estat = ZEBRA_AVANCA;
+          moveForward();
           break;
       }
       break;
@@ -262,13 +270,14 @@ void loop()
     //========================//
     case ZEBRA_AVANCA:
       //--------------[ ACCIONS ]--------------
-      moveForward();
+      // moveForward();
 
       //-----------[ CANVIS D'ESTAT ]----------
       instruccio = readInstructionFromRaspberry();
       if (instruccio == AVANCA)
       {
           estat = AVANCA;
+          moveForward();
           break;
       }
       break;

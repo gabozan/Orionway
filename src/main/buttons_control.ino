@@ -1,28 +1,3 @@
-const int buttonPins[3] = {2, 3, 4};
-int estatActual[3] = {HIGH, HIGH, HIGH};
-int estatAnterior[3] = {HIGH, HIGH, HIGH};
-unsigned long lastPressTime[3] = {0, 0, 0};
-int clickCount[3] = {0, 0, 0};
-unsigned long lastReleaseTime[3] = {0, 0, 0};
-unsigned long holdStartTime[3] = {0, 0, 0};
-int clickState[3] = {0, 0, 0};
-
-const long debounceDelay = 50;
-const long doubleClickInterval = 300;
-const long holdTimeThreshold = 3000;
-
-typedef enum
-{
-  BUTTON_NONE = -1,
-  BUTTON0_SINGLE_CLICK = 0,
-  BUTTON1_SINGLE_CLICK = 1,
-  BUTTON2_SINGLE_CLICK = 2,
-  BUTTON0_LONG_PRESS = 10,
-  BUTTON1_LONG_PRESS = 11,
-  BUTTON2_LONG_PRESS = 12,
-  BUTTON1_DOUBLE_CLICK = 21
-} ButtonEvent;
-
 void initButtons()
 {
   for (int i = 0; i < 3; i++)

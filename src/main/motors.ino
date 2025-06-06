@@ -1,28 +1,3 @@
-#define ENA 6
-#define IN1 8
-#define IN2 7
-#define ENB 3
-#define IN3 4
-#define IN4 5
-
-const float linealSpeed = 100; // cm/s (v)
-const float turningSpeed = 30; // rpm (ω)
-
-const float K_vL = 100.0 / 12.0; // rpm/V per al motor esquerre
-const float K_vR = 100.0 / 12.0;  // rpm/V per al motor dret
-
-const float V_bat = 12; // V : Bateria
-const float r = 4; // cm : Radi de les rodes
-const float d = 5; // cm : Distància entre el centre i una roda
-
-// PWM per moviment lineal
-const uint8_t linealPWML = 255 * linealSpeed / (V_bat * K_vL * r);
-const uint8_t linealPWMR = 255 * linealSpeed / (V_bat * K_vR * r);
-
-// PWM per gir
-const uint8_t turningPWML = 255 * (d * turningSpeed) / (V_bat * K_vL * r);
-const uint8_t turningPWMR = 255 * (d * turningSpeed) / (V_bat * K_vR * r);
-
 void initMotors() {
   pinMode(ENA, OUTPUT);
   pinMode(IN1, OUTPUT);

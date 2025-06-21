@@ -6,13 +6,29 @@
 
 from api_client import detect_objects, detect_person, detect_zebrai
 from audio_utils import generate_audio, play_audio
-
+from picamera2 import Picamera2
+from datetime import datetime
 # ==================================================================================================================== #
 
-# LEVON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# AQUI VA LA FUNCION DE HACER FOTO
-# def capture_image(path):
-# LA IMAGEN SE GUARDA EN path QUE SERA UN ARCHIVO TEMPORAL QUE SE IRA CREANDO Y BORRANDO A MEDIDA QUE LO NECESITEMOS
+
+def capture_image(path: str | None = None, warmup: float = 0.0) -> str:
+    """
+    Fa una fotografia amb la càmera Raspberry Pi y la guarda a 'path'.
+    Si 'path' és None, es genera un nom de fitxer basat en la data i hora actual.
+    El warmup és el temps en segons per a que la càmera s'escalfi abans de capturar la imatge
+    
+    Retorna
+        path: ruta on s'ha guardat el fitxer
+    """
+    if path is None:
+        path = datetime.now().strftime("%Y%m%d_%H%M%S.jpg")
+
+    picam2 = Picamera2()
+    picam2.configure(picam2.create_still_configuration())
+    picam2.start_and_capture_file(path, delay=warmup)
+    picam2.close()
+    return path
+
 
 
 def detect_object_in_hand(image_path: str):

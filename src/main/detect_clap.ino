@@ -1,11 +1,3 @@
-const int micPin = A0;
-const int soundThreshold = 800;
-const unsigned long minTimeGap = 200;
-const unsigned long maxTimeGap = 500;
-unsigned long previousTapTime = 0;
-unsigned long timeSinceLastTap = 0;
-
-
 int readInput() {
   int minValue = 1024;
   int maxValue = 0;

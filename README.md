@@ -56,6 +56,14 @@ Respecte als components hem utilitzat el següent:
  * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
 
+### 🖥️ Esquemes de software
+#### Casos d'us
+![](assets/software/casus)
+#### Mòduls
+![](assets/software/moduls)
+#### Estats
+![](assets/software/estats)
+
 ### 🖧 Esquema de hardware
   ![](hardware/esquema.png)
 

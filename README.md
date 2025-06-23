@@ -22,6 +22,7 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 - [💫 Funcionalitats]()
 - [⚙️ Arquitectura i hardware]()
 - [📋 Requisits i instalació]()
+- [🖧 Esquema de hardware]()
 - [🧪 Tests i millores]()
 - [🙌 Autors]()
 - [📄 Llicència]()
@@ -54,6 +55,9 @@ Respecte als components hem utilitzat el següent:
  * Motor 12V 455A105 [Datasheet](https://octopart.com/es/datasheet/455a105-2-globe+motors-19929790)
  * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
+
+### 🖧 Esquema de hardware
+  ![](hardware/esquema.png)
 
 ### 📋Requisits i instalació
 - **Python**: 3.10 

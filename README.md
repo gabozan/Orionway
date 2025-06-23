@@ -58,11 +58,11 @@ Respecte als components hem utilitzat el següent:
 
 ### 🖥️ Esquemes de software
 #### Casos d'us
-![](assets/software/casus)
+![](assets/software/casus.png)
 #### Mòduls
-![](assets/software/moduls)
+![](assets/software/moduls.png)
 #### Estats
-![](assets/software/estats)
+![](assets/software/estats.png)
 
 ### 🖧 Esquema de hardware
   ![](hardware/esquema.png)

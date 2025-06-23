@@ -17,14 +17,14 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 
 ### 📚 Taula de continguts
 
-- [📖 Descripció del projecte](#descripció-del-projecte)
+- [📖 Descripció del projecte]()
 - [🎥 Video demostració]()
-- [🧠 Característiques principals](#carasteríctiques-principals)
-- [⚙️ Arquitectura i hardware](arquitectura-i-hardware)
-- [🧪 Tests]()
+- [💫 Funcionalitats]()
+- [⚙️ Arquitectura i hardware]()
+- [📋 Requisits i instalació]()
+- [🧪 Tests i millores]()
 - [🙌 Autors]()
 - [📄 Llicència]()
-- [🚨 Advertència]()
 
 ### 🎥 Video demostració
 
@@ -54,6 +54,79 @@ Respecte als components hem utilitzat el següent:
  * Motor 12V 455A105 [Datasheet](https://octopart.com/es/datasheet/455a105-2-globe+motors-19929790)
  * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
+
+### 📋Requisits i instalació
+- **Python**: 3.10 
+- **Sistema operatiu**:
+  - Per a `cloud-api`: Linux recomanat 
+  - Per a `raspberry`: Raspbian o similar en Raspberry Pi.
+
+### Requisits per a `cloud-api`
+
+#### Dependències de Python
+
+```bash
+flask==3.1.1
+gunicorn==23.0.0
+ultralytics==8.3.111
+opencv-python-headless==4.10.0.84
+numpy==2.1.1
+torch>=1.8.0
+torchvision>=0.9.0
+pillow>=10.3.0
+PyYAML>=5.3.1
+requests>=2.32.2
+tqdm>=4.66.3
+pandas>=1.1.4
+```
+
+#### Dependències del sistema (Linux)
+
+```bash
+sudo apt-get update && sudo apt-get install 
+```
+
+### Requisits per a `raspberry`
+
+#### Dependències de Python
+
+```bash
+ultralytics==8.1.22
+opencv-python==4.9.0.80
+numpy==1.24.4
+google-cloud-texttospeech==2.15.1
+pygame==2.1.3
+```
+
+---
+
+### Instal·lació ràpida
+
+#### 1. Clona el repositori
+
+```bash
+git clone https://github.com/gabozan/Orionway
+cd Orionway
+```
+
+#### 2. Instal·la Python 3.10 i pip si no els tens
+
+#### 3. Instal·la les dependències per a cada subprojecte
+
+##### Per a `cloud-api`:
+
+```bash
+cd cloud-api
+pip install -r requirements.txt
+```
+
+##### Per a `raspberry`:
+
+```bash
+cd raspberry
+pip install -r requirements.txt
+```
+---
 
 ### 🧪 Tests i milllores
   * En aquest projecte s'han fet una serie de tests per tal de comprovar que el funcionament es com esperem que sigui, totes aquestes proves es troben en [Tests](/docs/Tests.pdf)

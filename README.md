@@ -12,6 +12,9 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 
 ---
 
+> [!CAUTION]
+> Orionway és un prototip experimental desenvolupat en un entorn acadèmic i no està certificat per a ús assistencial en entorns reals. El seu ús com a substitut d’un gos guia o bastó blanc no està recomanat en entorns no controlats.
+
 ### 📚 Taula de continguts
 
 - [📖 Descripció del projecte](#descripció-del-projecte)
@@ -66,5 +69,3 @@ Respecte als components hem utilitzat el següent:
 
 ### 📄 Llicència
   Aquest projecte està llicenciat sota la Llicència MIT.
-### 🚨 Advertència
-  Orionway és un prototip experimental desenvolupat en un entorn acadèmic i no està certificat per a ús assistencial en entorns reals. El seu ús com a substitut d’un gos guia o bastó blanc no està recomanat en entorns no controlats.

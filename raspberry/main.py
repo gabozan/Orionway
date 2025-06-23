@@ -4,10 +4,14 @@
 #                                                                                                                      #
 ########################################################################################################################
 
+import threading
+import time
 from enum import IntEnum
 from ArduinoIO import ArduinoIO
-import time
-from functions import detect_object_in_hand
+from camera_utils import capture_image
+from crosswalk import detect_crosswalk, run_zebrai
+from object_recognition import detect_object_in_hand, announce_object
+from person_interaction import detect_person_info
 
 # ==================================================================================================================== #
 
@@ -25,137 +29,143 @@ class RobotState(IntEnum):
     ZEBRA_AVANCA = 7
     APROPAMENT = 8
 
-# ----------------------------------------------------------------------
-# Estat global i instància de l'ArduinoIO
-# ----------------------------------------------------------------------
-estat = RobotState.ATURAT
-gira_seguent = RobotState.ATURAT
-arduino = ArduinoIO()
 
 # ==================================================================================================================== #
 
-def loop():
-    global estat
+
+def main():
+    img_path = "./tmp/current.jpg"
+    arduino = ArduinoIO()
+    estat = RobotState.ATURAT
+    estat_ant = None
+
+    # Variables per controlar la freqüència de detecció de zebra
+    last_zebra_check_time = 0.0
+    zebra_check_interval = 3.0
+
+    # Variables per detectar persona amb throttling
+    last_person_check_time = 0.0
+    person_check_interval = 1.5
+    last_person = {
+        'detected': False,
+        'x_offset': 0.0,
+        'is_close': False
+    }
+
     try:
-        print("Connectant amb l'Arduino i iniciant loop...")
-        time.sleep(0.5)
-
+        print("Iniciant el bucle principal...")
         while True:
-            # Llegim si l'Arduino ens envia algun codi
-            state = arduino.read_instruction()
-            if state != -1:
+            current_time = time.time()
+            # Llegim instrucció de l'Arduino
+            code = arduino.read_instruction()
+            if code != -1:
                 try:
-                    nou_estat = RobotState(state)
-                    # Només canviem estat si realment és vàlid
-                    print(f"Rebut codi des de l'Arduino: {nou_estat.name} ({state})")
-                    estat = nou_estat
+                    estat = RobotState(code)
+                    print(f"Rebut codi de l'Arduino: {estat.name} ({code})")
                 except ValueError:
-                    print(f"Codi rebut desconegut: {state}")
+                    print(f"Codi desconegut rebut: {code}")
 
-            # Ara gestionem el nostre estat Raspberry
+            # Capturem imatge
+            capture_image(img_path)
+
+            ############################################################################################################
             if estat == RobotState.ATURAT:
-                # Enviem instrucció ATURAT a Arduino per si de cas
-                arduino.send_instruction(RobotState.ATURAT.value)
-                time.sleep(0.1)
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.ATURAT.value)
+                    estat_ant = estat
+            ############################################################################################################
             elif estat == RobotState.RECONEIX:
-                # ESTAT: RECONEIX
-                # La Raspberry ha de fer la detecció d'objectes
-                print("Reconeixent l'objecte...")
-                objects = detect_object_in_hand()
-                print(f"- detectarObjetos() = {objects}")
-                # Un cop has acabat la fase de reconeixement envíem ATURAT per dir a l'Arduino que ha acabat correctament
-                print("Reconeixement finalitzat. Avís a l'Arduino: ATURAT")
+                obj = detect_object_in_hand(img_path)
+                announce_object(obj)
                 arduino.send_instruction(RobotState.ATURAT.value)
-                # Tornem a ATURAT
                 estat = RobotState.ATURAT
-                time.sleep(0.1)
+            ############################################################################################################
             elif estat == RobotState.AVANCA:
-                # ESTAT: AVANCA
-                # La Raspberry monitoritza la càmera per detectar ZEBRAI
-                zebra_detectada = detectarZebra()
-                if zebra_detectada:
-                    print("Zebra detectada. Enviant ZEBRA_UBICA a l'Arduino...")
+                if current_time - last_zebra_check_time >= zebra_check_interval:
+                    cross = detect_crosswalk(img_path)
+                    last_zebra_check_time = current_time
+                else:
+                    cross = {"zebra": False}
+
+                if cross.get("zebra", False):
+                    print("Zebra detectada, canviant a ZEBRA_UBICA")
                     arduino.send_instruction(RobotState.ZEBRA_UBICA.value)
                     estat = RobotState.ZEBRA_UBICA
                 else:
-                    # Si no hi ha zebra, podem enviem un missatge per seguir avançant
                     arduino.send_instruction(RobotState.AVANCA.value)
-                    print("Segueix avançant...")
-                time.sleep(0.1)
-            elif estat == RobotState.PETICIO:
-                # ESTAT: PETICIO
-                print("Arduino està en PETICIO. Mentrestant, Raspberry no fa res extra.")
-                time.sleep(0.1)
-            elif estat == RobotState.GIRA:
-                # ESTAT: GIRA
-                # Aquí Arduino gestiona el gir ("rotate(angle)") sense intervenció de la Raspberry
-                print("Arduino està girant. Raspberry no intervé en el gir.")
-                time.sleep(0.1)
+            ############################################################################################################
             elif estat == RobotState.ZEBRA_UBICA:
-                # ESTAT: ZEBRA_UBICA
-                # Ara la Raspberry ha de localitzar amb precisió la zebra
-                # Un cop ho tingui, envia ZEBRA_ESPERA per avisar l'Arduino
-                print("Localitzant zebra amb visió...")
-                # TODO: Inicio codigo ZEBRAI
-                time.sleep(0.5)
-                # TODO: Fin codigo ZEBRAI
-                print("Zebra ubicada. Enviant ZEBRA_ESPERA a Arduino.")
+                print("Ubicant zebra. S'executa ZEBRAI")
+                #run_zebrai() #FALTA IMPLEMENTAR!!!-----------------------------------------
                 arduino.send_instruction(RobotState.ZEBRA_ESPERA.value)
                 estat = RobotState.ZEBRA_ESPERA
-                time.sleep(0.1)
+            ############################################################################################################
             elif estat == RobotState.ZEBRA_ESPERA:
-                # ESTAT: ZEBRA_ESPERA
-                # TODO: Inicio codigo ZEBRAI
-                time.sleep(0.5)
-                # TODO: Fin codigo ZEBRAI
+                cross = detect_crosswalk(img_path)
+                zebra_lights = cross.get("zebra", False)
                 if not zebra_encara:
+                    print("Zebra ja no detectada. Seguint ZEBRA_AVANCA")
                     arduino.send_instruction(RobotState.ZEBRA_AVANCA.value)
                     estat = RobotState.ZEBRA_AVANCA
-                else:
-                    time.sleep(0.2)
+            ############################################################################################################
             elif estat == RobotState.ZEBRA_AVANCA:
-                # ESTAT: ZEBRA_AVANCA
-                # Arduino mou cap endavant per acabar de creuar.
-                # un cop la zebra (línia o vianants) ja no és detectable, enviem AVANCA.
-                print("Arduino avançant sobre la zebra. Comprovo si ja ha creuat.")
-                zebra_encara = detectarZebra()
+                cross = detect_crosswalk(img_path)
+                zebra_encara = cross.get("zebra", False)
                 if not zebra_encara:
-                    print("Zebra completada. Enviant AVANCA a Arduino.")
+                    print("Creuament completat. Tornant a AVANCA")
                     arduino.send_instruction(RobotState.AVANCA.value)
                     estat = RobotState.AVANCA
                 else:
-                    # Esperem una micona més
-                    time.sleep(0.2)
+                    arduino.send_instruction(RobotState.ZEBRA_AVANCA.value)
+            ############################################################################################################
+            elif estat == RobotState.PETICIO:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.PETICIO.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.GIRA:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.GIRA.value)
+                    estat_ant = estat
+            ############################################################################################################
             elif estat == RobotState.APROPAMENT:
-                # ESTAT: APROPAMENT
-                # Funcio per aproximar-nos a una persona
-                print("Buscant persona per apropar-me...")
-                persona_vista = detectarPersona()
-                if persona_vista:
-                    # Quan detectem la persona prou a prop, enviem ATURAT perquè l'Arduino pari
-                    print("Persona detectada. Enviant ATURAT a Arduino per aturar-me.")
+                if current_time - last_person_check_time >= person_check_interval:
+                    person = detect_person_info(img_path)
+                    last_person_check_time = current_time
+                    last_person = person
+                else:
+                    person = last_person
+
+                if not person.get('detected', False):
+                    print("Cap persona detectada. Enviant ATURAT")
                     arduino.send_instruction(RobotState.ATURAT.value)
                     estat = RobotState.ATURAT
                 else:
-                    # Encara no la veiem: decidim si enviem ordres per avançar o girar lleugerament.
-                    # Per ara enviem AVANCA per anar mirant a la gent...
-                    print("Encara no veig persona. Enviant AVANCA per seguir buscant.")
-                    arduino.send_instruction(RobotState.AVANCA.value)
-                    # REMARCA: Arduino entrarà a l'estat AVANCA quan rebi aquest codi.
-                    estat = RobotState.AVANCA
-                time.sleep(0.1)
+                    offset = person.get('x_offset', 0.0)
+                    if person.get('is_close', False):
+                        print("Persona a prop. Enviant ATURAT")
+                        arduino.send_instruction(RobotState.ATURAT.value)
+                        estat = RobotState.ATURAT
+                    else:
+                        print(f"Persona detectada amb offset {offset:.2f}. Ajustant trajectòria")
+                        arduino.send_instruction(RobotState.APROPAMENT.value)
+                        arduino.send_float(offset)
+                        estat = RobotState.APROPAMENT
+            ############################################################################################################
             else:
-                # Si rebem algun estat desconegut, mandrem STOP
                 print(f"Estat desconegut: {estat}. Tornant a ATURAT.")
                 arduino.send_instruction(RobotState.ATURAT.value)
                 estat = RobotState.ATURAT
-                time.sleep(0.1)
+            ############################################################################################################
+            time.sleep(0.1)
+
     except KeyboardInterrupt:
         print("\nInterrupció per teclat.")
     finally:
         arduino.close()
-        print("Port tancat correctament.")
+        print("Sortida i tancament completat.")
 
 
 if __name__ == "__main__":
-    loop()
+    main()
+

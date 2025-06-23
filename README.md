@@ -17,14 +17,16 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 
 ### 📚 Taula de continguts
 
-- [📖 Descripció del projecte]()
 - [🎥 Video demostració]()
 - [💫 Funcionalitats]()
 - [⚙️ Arquitectura i hardware]()
 - [📋 Requisits i instalació]()
+- [🖥️ Esquemes de software]()
 - [🖧 Esquema de hardware]()
 - [🧪 Tests i millores]()
 - [🙌 Autors]()
+- [🤝 Apoyo]()
+- [📚 Bibliografía]()
 - [📄 Llicència]()
 
 ### 🎥 Video demostració
@@ -151,6 +153,22 @@ pip install -r requirements.txt
 | Luis Martínez Zamora                     | 1668180            |
 | Sebastian Malbaceda                      | 1681519            |
 |  Gabriel Rios Sanchez                    |  1671177           |
+
+### 🤝 Suport
+#### Institucions
+[Escola Enginyeria - UAB](https://www.uab.cat/ca/enginyeria)
+
+[UAB Open Labs](https://webs.uab.cat/openlabs/)
+
+#### Professorat
+* Fernando Luis Vilariño Freire
+* Vernon Stanley Albayeros Duarte
+* Carlos Garcia Calvo
+
+### 📚 Bibliografía 
+[Problemas y requisitos en el diseño de un robot de guiado para personas ciegas y mayores](https://publicaciones.asoc-aeim.es/anales/article/view/32/220)
+
+[Una revisión de sistemas asistenciales basados en visión para personas con discapacidad visual: tecnologías, aplicaciones y direcciones futuras.](https://chatpaper.com/es/chatpaper/paper/138956)
 
 ### 📄 Llicència
   Aquest projecte està llicenciat sota la Llicència MIT.

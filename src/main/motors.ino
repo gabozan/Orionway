@@ -11,7 +11,6 @@ void rightTick()
 
 void initMotors()
 {
-  Serial.begin(115200);
   delay(200);
   pinMode(LPWM1, OUTPUT);
   pinMode(LPWM2, OUTPUT);
@@ -83,7 +82,7 @@ void rotate(float angleRad)
   {
     long left = getLeftTicks();
     long right = getRightTicks();
-
+    // if(getButtons()==1) giraSeguent=ATURAT;
     // Serial.print("Target: ");
     // Serial.print(targetTicks);
     // Serial.print(" | L: ");

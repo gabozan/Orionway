@@ -27,7 +27,7 @@ typedef enum
 // ---------------------------------------- detect_distances.ino
 const int trigPins[3] = {45, 13, 47};
 const int echoPins[3] = {44, 12, 46};
-const int thresholds[3] = {0.2, 0.2, 0.2};
+const int thresholds[3] = {30, 30, 30};
 
 float distancies[3];
 
@@ -41,28 +41,28 @@ bool objectesDetectats[3];
 // ---------------------------------------- motors.ino
 #include <RotaryEncoder.h>
 
-#define LPWM1 5
-#define LPWM2 6
-#define RPWM1 10
-#define RPWM2 11
+#define LPWM1 10
+#define LPWM2 11
+#define RPWM1 5
+#define RPWM2 6
 
 #define LEFT_CHA 19
 #define LEFT_CHB 20
 #define RIGHT_CHA 2
 #define RIGHT_CHB 3
 
-const long TICKS_PER_REV = 50000;
+const long TICKS_PER_REV = 45000;//50000;
 const float r = 7.25; // cm
 const float d = 15.0; // cm
-const uint8_t linealPWM = 100;
-const uint8_t rotatoryPWM = 100;
+const uint8_t linealPWM = 50;
+const uint8_t rotatoryPWM = 80;
 
 RotaryEncoder leftEncoder(LEFT_CHA, LEFT_CHB, RotaryEncoder::LatchMode::TWO03);
 RotaryEncoder rightEncoder(RIGHT_CHA, RIGHT_CHB, RotaryEncoder::LatchMode::TWO03);
 
 // ---------------------------------------- detect_clap.ino
 const int micPin = A0;
-const int soundThreshold = 50;
+const int soundThreshold = 1500;
 const unsigned long minTimeGap = 200;
 const unsigned long maxTimeGap = 500;
 unsigned long previousTapTime = 0;
@@ -86,6 +86,21 @@ RobotState giraSeguent = ATURAT;
 float angle=0;
 int instruccio;
 
+const char* robotStateToString(RobotState state) {
+  switch (state) {
+    case ATURAT:        return "ATURAT    ";
+    case RECONEIX:      return "RECONEIX  ";
+    case AVANCA:        return "AVANCA    ";
+    case GIRA:          return "GIRA      ";
+    case PETICIO:       return "PETICIO   ";
+    case ZEBRA_ESPERA:  return "ZEB_ESPERA";
+    case ZEBRA_UBICA:   return "ZEB_UBICA ";
+    case ZEBRA_AVANCA:  return "ZEB_AVANCA";
+    case APROPAMENT:    return "APROPAMENT";
+    default:            return "DESCONEGUT";
+  }
+}
+
 void setup()
 {
   initDistancies();
@@ -99,13 +114,14 @@ void loop()
   unsigned long currentTime = millis();
   button = getButtons();
   RevisaObstacles();
+  // Serial.println(readInput());
   Serial.print("\rEstat: ");
-  Serial.print(estat);
+  Serial.print(robotStateToString(estat));
   Serial.print(" | Button: ");
   Serial.print(button);
-  Serial.print(" | Front: ");
-  Serial.print(objectesDetectats[0]);
   Serial.print(" | Left: ");
+  Serial.print(objectesDetectats[0]);
+  Serial.print(" | Front: ");
   Serial.print(objectesDetectats[1]);
   Serial.print(" | Right: ");
   Serial.print(objectesDetectats[2]);
@@ -174,7 +190,7 @@ void loop()
       // RevisaObstacles(objectesDetectats);
       if(objectesDetectats[1])
       {
-        angle = objectesDetectats[2]? -PI/2 : PI/2;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'aver gir 180º)
+        angle = objectesDetectats[2]? -PI/2 : PI/2;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'haver gir 180º)
         estat = GIRA;
         giraSeguent = AVANCA;
         break;

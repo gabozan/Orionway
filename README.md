@@ -3,6 +3,7 @@
 </p>
 
 # OrionWay:  El guia robot per a trobar el teu camí 🤖👨‍🦯
+![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=0b0556)&nbsp;&nbsp;![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
 
 OrionWay és un **robot guia** dissenyat per acompanyar persones amb **discapacitat visual** en **entorns segurs**, com el campus de la Universitat Autònoma de Barcelona (UAB).
 
@@ -15,23 +16,50 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 > [!CAUTION]
 > Orionway és un prototip experimental desenvolupat en un entorn acadèmic i no està certificat per a ús assistencial en entorns reals. El seu ús com a substitut d’un gos guia o bastó blanc no està recomanat en entorns no controlats.
 
-### 📚 Taula de continguts
+## 🙌 Autors
+  | Nom             | NIU         |
+|----------------------|-------------|
+| Albert Capdevila Estadella                     | 1587933            |
+| Levon Kesoyan Galstyan                      |  1668018           |
+| Luis Martínez Zamora                     | 1668180            |
+| Sebastian Malbaceda                      | 1681519            |
+|  Gabriel Rios Sanchez                    |  1671177           |
 
-- [🎥 Video demostració]()
-- [💫 Funcionalitats]()
-- [⚙️ Arquitectura i hardware]()
-- [📋 Requisits i instalació]()
-- [🖥️ Esquemes de software]()
-- [🖧 Esquema de hardware]()
-- [🧪 Tests i millores]()
-- [🙌 Autors]()
-- [🤝 Apoyo]()
-- [📚 Bibliografía]()
-- [📄 Llicència]()
+## 🤝 Suport
 
-### 🎥 Video demostració
+### Agraïment especial
+Gràcies a **Sergio Alamar**, humorista i exjugador de la selecció espanyola de futbol paralímpic, per compartir amb nosaltres la seva experiència directa com a persona cega. La seva col·laboració ens ha ajudat a identificar detalls essencials i a enfocar millor el desenvolupament d’OrionWay per fer-lo realment útil en situacions del dia a dia.
 
-### 💫 Funcionalitats del robot OrionWay
+Si voleu conèixer més la seva història: [Article de La Vanguardia](https://www.lavanguardia.com/local/valencia/20250329/10522940/ciego-gracioso-sergio-alamar-comico-exolimpico.html)
+
+![Static Badge](https://img.shields.io/badge/Instagram-%40sergioalamar07-96003e?logo=Instagram&labelColor=black&logoColor=FF0069)
+
+### Institucions
+* [Escola Enginyeria - UAB](https://www.uab.cat/ca/enginyeria)
+* [UAB Open Labs](https://webs.uab.cat/openlabs/)
+
+### Professorat
+* Fernando Luis Vilariño Freire
+* Vernon Stanley Albayeros Duarte
+* Carlos Garcia Calvo
+
+## 📚 Taula de continguts
+
+- [🎥 Video demostració](#-video-demostració)
+- [💫 Funcionalitats del robot OrionWay](#-funcionalitats-del-robot-orionway)
+- [⚙️ Arquitectura i hardware](#️-arquitectura-i-hardware)
+- [📋 Requisits i instalació](#requisits-i-instalació)
+- [🖥️ Esquemes de software](#️-esquemes-de-software)
+- [🖧 Esquema de hardware](#-esquema-de-hardware)
+- [🧪 Tests i millores](#-tests-i-milllores)
+- [🙌 Autors](#-autors)
+- [🤝 Suport](#-suport)
+- [📚 Bibliografía](#-bibliografía)
+- [📄 Llicència](#-llicència)
+
+## 🎥 Video demostració
+
+## 💫 Funcionalitats del robot OrionWay
 
 | **Funcionalitat** | **Demostració** |
 |-------------------|-----------------|
@@ -41,7 +69,7 @@ El projecte combina sensors i visió per computador per oferir assistència en e
 | **Reconeixement d'objectes i resposta per veu**<br>En qualsevol moment, l'usuari podrà preguntar al robot què subjecta a la seva mà mitjançant els botons situats al mànec. És a dir, utilitzant la càmera, el robot es detindrà, girarà la càmera, farà un reconeixement per imatge de l'objecte que l'usuari li mostri, i s'utilitzarà l'altaveu per a dir la resposta. | ![](ruta/a/gif_reconeixement.gif) |
 | **Apropament automàtic cap a l'usuari en entorns tancats**<br>En situacions en què el robot té visió de l'usuari en un entorn tancat, aquest podrà ser cridat per l'usuari picant dues vegades de mans. Quan això succeeixi, el robot farà fotografies en tots els seus angles i detectarà la direcció on es troba l'usuari. Aleshores, utilitzant els sensors d'ultrasons, navegarà fins a l'usuari desplaçant-se al voltant dels obstacles que podrà trobar. | ![](ruta/a/gif_apropament.gif) |
    
-### ⚙️ Arquitectura i hardware
+## ⚙️ Arquitectura i hardware
 
 L'arquitectura de software del nostre projecte está formada per:
  * Arduino
@@ -58,18 +86,16 @@ Respecte als components hem utilitzat el següent:
  * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
 
-### 🖥️ Esquemes de software
-#### Casos d'us
+## 🖥️ Esquemes de software
+### Casos d'us
 ![](assets/software/casus.png)
-#### Mòduls
-![](assets/software/moduls.png)
-#### Estats
+### Estats
 ![](assets/software/estats.png)
 
 ### 🖧 Esquema de hardware
   ![](hardware/esquema.png)
 
-### 📋Requisits i instalació
+## 📋Requisits i instalació
 - **Python**: 3.10 
 - **Sistema operatiu**:
   - Per a `cloud-api`: Linux recomanat 
@@ -142,30 +168,11 @@ pip install -r requirements.txt
 ```
 ---
 
-### 🧪 Tests i milllores
+## 🧪 Tests i milllores
   * En aquest projecte s'han fet una serie de tests per tal de comprovar que el funcionament es com esperem que sigui, totes aquestes proves es troben en [Tests](/docs/Tests.pdf)
   * Per altra banda, en aquest projecte hem tingut en compte unes posibles millores que té l'utilització del robot, tots aquests els hem recopilat en [Millores](/docs/Millores.pdf)  
-### 🙌 Autors
-  | Nom             | NIU         |
-|----------------------|-------------|
-| Albert Capdevila Estadella                     | 1587933            |
-| Levon Kesoyan Galstyan                      |  1668018           |
-| Luis Martínez Zamora                     | 1668180            |
-| Sebastian Malbaceda                      | 1681519            |
-|  Gabriel Rios Sanchez                    |  1671177           |
 
-### 🤝 Suport
-#### Institucions
-[Escola Enginyeria - UAB](https://www.uab.cat/ca/enginyeria)
-
-[UAB Open Labs](https://webs.uab.cat/openlabs/)
-
-#### Professorat
-* Fernando Luis Vilariño Freire
-* Vernon Stanley Albayeros Duarte
-* Carlos Garcia Calvo
-
-### 📚 Bibliografía 
+## 📚 Bibliografía 
 [Problemas y requisitos en el diseño de un robot de guiado para personas ciegas y mayores](https://publicaciones.asoc-aeim.es/anales/article/view/32/220)
 
 [Una revisión de sistemas asistenciales basados en visión para personas con discapacidad visual: tecnologías, aplicaciones y direcciones futuras.](https://chatpaper.com/es/chatpaper/paper/138956)

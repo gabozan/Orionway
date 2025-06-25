@@ -86,9 +86,19 @@ Respecte als components hem utilitzat el següent:
  * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
 
+Hem realitzar impressions 3D del següent:
+
+| ![](assets/dissenys%203D/Mango.gif) | ![](assets/dissenys%203D/SoporteCamara.gif) | ![](assets/dissenys%203D/SoporteMotorPasoAPaso.gif) |
+|-------------------------------------|----------------------------------------------|------------------------------------------------------|
+| [Mànec](3D%20designs/Mango.stl)     | [Suport Càmera](3D%20designs/SoporteCamara.stl) |[Suport Motor Pas a Pas](3D%20designs/SoporteMotorPasoAPaso.stl)|
+
+
+
 ## 🖥️ Esquemes de software
 ### Casos d'us
 ![](assets/software/casus.png)
+### Mòduls
+![](assets/sofware/moduls.png)
 ### Estats
 ![](assets/software/estats.png)
 

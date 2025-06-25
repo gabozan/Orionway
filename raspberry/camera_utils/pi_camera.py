@@ -4,7 +4,7 @@
 #                                                                                                                      #
 ########################################################################################################################
 
-from picamera2 import Picamera2
+from picamera2 import Picamera2, Transform
 from datetime import datetime
 
 # ==================================================================================================================== #
@@ -23,7 +23,8 @@ def capture_image(path: str | None = None, warmup: float = 0.0) -> str:
         path = datetime.now().strftime("%Y%m%d_%H%M%S.jpg")
 
     picam2 = Picamera2()
-    picam2.configure(picam2.create_still_configuration())
+    config = picam2.create_still_configuration(transform=Transform(hflip=True, vflip=True))
+    picam2.configure(config)
     picam2.start_and_capture_file(path, delay=warmup)
     picam2.close()
     return path

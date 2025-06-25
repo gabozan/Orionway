@@ -98,7 +98,7 @@ Hem realitzar impressions 3D del següent:
 ### Casos d'us
 ![](assets/software/casus.png)
 ### Mòduls
-![](assets/sofware/moduls.png)
+![](assets/software/moduls.png)
 ### Estats
 ![](assets/software/estats.png)
 

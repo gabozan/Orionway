@@ -3,7 +3,7 @@
 </p>
 
 # OrionWay:  El guia robot per a trobar el teu camí 🤖👨‍🦯
-![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=0b0556)&nbsp;&nbsp;![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
+![Python](https://img.shields.io/badge/Python-254f71?style=for-the-badge&logo=python&logoColor=254f71&labelColor=FFD43B)&nbsp;&nbsp;![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
 
 OrionWay és un **robot guia** dissenyat per acompanyar persones amb **discapacitat visual** en **entorns segurs**, com el campus de la Universitat Autònoma de Barcelona (UAB).
 
@@ -62,7 +62,7 @@ Si voleu conèixer més la seva història: [Article de La Vanguardia](https://ww
 
 | **Funcionalitat** | **Demostració** |
 |-------------------|-----------------|
-| **Detecció i reacció a obstacles immediats**<br>Mitjançant els tres sensors d'ultrasons situats al cos del robot i connectats a la placa Arduino, aquest serà capaç de detectar elements propers i modificar la trajectòria dels motors per tal d'esquivar-los. Ha de ser una funcionalitat molt ràpida i eficient, per tal d'aconseguir el millor temps de reacció. | ![](ruta/a/gif_obstacles.gif) |
+| **Detecció i reacció a obstacles immediats**<br>Mitjançant els tres sensors d'ultrasons situats al cos del robot i connectats a la placa Arduino, aquest serà capaç de detectar elements propers i modificar la trajectòria dels motors per tal d'esquivar-los. Ha de ser una funcionalitat molt ràpida i eficient, per tal d'aconseguir el millor temps de reacció. | ![](assets/funcionalitats/obstacles_immediats.gif) |
 | **Detecció i reacció a passos de zebra amb semàfors**<br>Mitjançant la càmera i un model de visió per computador, podrem saber l'orientació dels passos de zebra propers, a més de detectar si els seus semàfors es troben en verd o en vermell. Això permetrà encarar el pas de zebra i creuar-lo quan pertoqui, evitant el perill. | ![](ruta/a/gif_passos_zebra.gif) |
 | **Dirigir manualment el robot en qualsevol moment**<br>En qualsevol moment dins el guiatge del robot, l'usuari podrà prémer els botons del mànec per a forçar manualment girs a la dreta o a l'esquerra. **IMPORTANT** Aquesta funcionalitat no tindrà més prioritat que les dues funcionalitats anteriors, és a dir, si a l'esquerra del robot es troba un obstacle immediat o un pas de zebra amb semàfor en vermell, el robot es detindrà. | ![](ruta/a/gif_control_manual.gif) |
 | **Reconeixement d'objectes i resposta per veu**<br>En qualsevol moment, l'usuari podrà preguntar al robot què subjecta a la seva mà mitjançant els botons situats al mànec. És a dir, utilitzant la càmera, el robot es detindrà, girarà la càmera, farà un reconeixement per imatge de l'objecte que l'usuari li mostri, i s'utilitzarà l'altaveu per a dir la resposta. | ![](ruta/a/gif_reconeixement.gif) |

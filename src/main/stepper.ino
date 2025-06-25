@@ -1,24 +1,3 @@
-const int IN1 = 8;   // módulo IN1
-const int IN2 = 9;   // módulo IN2
-const int IN3 = 10;  // módulo IN3
-const int IN4 = 11;  // módulo IN4
-
-const int STEPS_PER_REV = 2048;  // pasos totales
-const int STEP_DELAY = 3000;     // velocidad
-
-const int stepSequence[8][4] = {
-  {1, 0, 0, 0},
-  {1, 1, 0, 0},
-  {0, 1, 0, 0},
-  {0, 1, 1, 0},
-  {0, 0, 1, 0},
-  {0, 0, 1, 1},
-  {0, 0, 0, 1},
-  {1, 0, 0, 1}
-};
-
-int absolutePosition = 0;
-
 void initStepperCam() {
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -40,8 +19,8 @@ void moveSingleStep(int direction) {
   absolutePosition += direction;
 }
 
-void rotateCamera(float targetAngle) {
-  int targetSteps = round(targetAngle * STEPS_PER_REV / 360.0);
+void rotateCamera(double targetAngle) {
+  int targetSteps = round(targetAngle * STEPS_PER_REV / TWO_PI);
 
   int stepsToMove = targetSteps - absolutePosition;
   int direction = (stepsToMove > 0) ? 1 : -1;

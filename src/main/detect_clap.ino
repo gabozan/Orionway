@@ -9,14 +9,19 @@ int readInput() {
   return maxValue - minValue;
 }
 
+// bool getTaps() {
+//   int delta = readInput();
+//   if (delta > soundThreshold) {
+//     timeSinceLastTap = millis() - previousTapTime;
+//     if (timeSinceLastTap > minTimeGap && timeSinceLastTap < maxTimeGap) {
+//       return true;
+//     }
+//     previousTapTime = millis();
+//   }
+//   return false;
+// }
+
 bool getTaps() {
   int delta = readInput();
-  if (delta > soundThreshold) {
-    timeSinceLastTap = millis() - previousTapTime;
-    if (timeSinceLastTap > minTimeGap && timeSinceLastTap < maxTimeGap) {
-      return true;
-    }
-    previousTapTime = millis();
-  }
-  return false;
+  return delta > soundThreshold;
 }

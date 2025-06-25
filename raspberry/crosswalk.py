@@ -43,13 +43,7 @@ def detect_crosswalk(image_path: str) -> dict:
     }
 
 def run_zebrai(image_path: str) -> float:
-    """
-    ALBERT!!!!!!!!!!!!!!!!!!!!!!!!!
-    AQUI VA EL CODIGO DE ZEBRAI DESPUES DE DETECTAR UN PASO DE ZEBRA CON LA FUNCION ANTERIOR, PUEDES USAR COMO PARAMETROS
-    SI LO NECESITAS EL traffic_light YA QUE LO DEVUELVO EN EL RETURN. EN CUANTO AL RETURN DE ESTA FUNCION, DESPUES DE UBICAR
-    AL ROBOT HABRIA QUE MANDARLE AL ARDUINO COMO QUEREMOS QUE SE UBIQUE, ESTO NOSE SI CON EL MISMO ESTADO LO PODRIAMOS GESTIONAR
-    O NECESITAMOS UNO ADICIONAL.
-    """
+    
     img = plt.imread(image_path)
     gray = to_uint8(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
     try:

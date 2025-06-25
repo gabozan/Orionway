@@ -12,21 +12,6 @@ int cameraCurrentAngle = 0;
 // PROPOSTA DE FUNCIONS
 // ----------------------
 
-// Canviar ???
-void rotateCamera(int angle) {
-
-    int delta = angle - cameraCurrentAngle;
-
-    if (delta != 0) {
-        stepper_rotateDegrees(delta);
-        cameraCurrentAngle = angle;
-    }
-}
-
-void rotateCameraToCenter() {
-    rotateCamera(0);
-}
-
 bool detectPerson(int& angleOut, uint16_t& bbWidth) {
     return false; //FALTA IMPLEMENTACIO
 }

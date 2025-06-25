@@ -56,3 +56,7 @@ void rotateCamera(float targetAngle) {
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, LOW);
 }
+
+void rotateCameraToCenter() {
+  rotateCamera(0);
+}

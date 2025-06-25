@@ -53,8 +53,6 @@ Si voleu conèixer més la seva història: [Article de La Vanguardia](https://ww
 - [🖧 Esquema de hardware](#-esquema-de-hardware)
 - [🧪 Tests i millores](#-tests-i-milllores)
 - [🫴 Aportacions destacades](#-aportacions-destacades)
-- [🙌 Autors](#-autors)
-- [🤝 Suport](#-suport)
 - [📚 Bibliografía](#-bibliografía)
 - [📄 Llicència](#-llicència)
 

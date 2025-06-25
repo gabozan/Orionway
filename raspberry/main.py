@@ -105,7 +105,7 @@ def main():
             ############################################################################################################
             elif estat == RobotState.ZEBRA_UBICA:
                 print("Ubicant zebra. S'executa ZEBRAI")
-                #run_zebrai() #FALTA IMPLEMENTAR!!!-----------------------------------------
+                #run_zebrai(img_path) #FALTA IMPLEMENTAR!!!-----------------------------------------
                 arduino.send_instruction(RobotState.ZEBRA_ESPERA.value)
                 estat = RobotState.ZEBRA_ESPERA
             ############################################################################################################

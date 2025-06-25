@@ -5,7 +5,10 @@
 ########################################################################################################################
 
 from api_client import detect_zebrai
-
+import matplotlib.pyplot as plt
+import numpy as np
+import cv2
+from utils_crosswalk import *
 # ==================================================================================================================== #
 
 def detect_crosswalk(image_path: str) -> dict:
@@ -39,13 +42,27 @@ def detect_crosswalk(image_path: str) -> dict:
         "traffic_light": traffic_light_color
     }
 
+def run_zebrai(image_path: str) -> float:
+    
+    img = plt.imread(image_path)
+    gray = to_uint8(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+    try:
+        src = noise_filter(gray)
+        thr = find_threshold(src)
+        if not (0 <= thr <= 255):
+            raise ValueError(f"Threshold invàlid: {thr}")
+        bw = 255 * (src > thr).astype(np.uint8)
+        edges = get_edges(bw)
+        filtered_lines = get_filtered_lines(edges)
+        filtered_lines = remove_duplicate_lines(filtered_lines, gray.shape)
+        if is_empty(filtered_lines):
+            raise Exception("No s'han trobat línies")
+        
+        p_izq, p_der = get_limits(filtered_lines, edges)
+        midpoints = get_mid_points(filtered_lines, p_izq, p_der, gray.shape)
+        angle_rad = get_angle(midpoints, gray.shape)
 
-def run_zebrai():
-    """
-    ALBERT!!!!!!!!!!!!!!!!!!!!!!!!!
-    AQUI VA EL CODIGO DE ZEBRAI DESPUES DE DETECTAR UN PASO DE ZEBRA CON LA FUNCION ANTERIOR, PUEDES USAR COMO PARAMETROS
-    SI LO NECESITAS EL traffic_light YA QUE LO DEVUELVO EN EL RETURN. EN CUANTO AL RETURN DE ESTA FUNCION, DESPUES DE UBICAR
-    AL ROBOT HABRIA QUE MANDARLE AL ARDUINO COMO QUEREMOS QUE SE UBIQUE, ESTO NOSE SI CON EL MISMO ESTADO LO PODRIAMOS GESTIONAR
-    O NECESITAMOS UNO ADICIONAL.
-    """
-    return None
+        return angle_rad
+        
+    except:
+        return 0.0

@@ -141,9 +141,11 @@ sudo apt-get update && sudo apt-get install
 #### Dependències de Python
 
 ```bash
-ultralytics==8.1.22
+pyserial==3.5
+picamera2==0.0.5
 opencv-python==4.9.0.80
 numpy==1.24.4
+requests==2.31.0
 google-cloud-texttospeech==2.15.1
 pygame==2.1.3
 ```

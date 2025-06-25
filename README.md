@@ -52,6 +52,7 @@ Si voleu conèixer més la seva història: [Article de La Vanguardia](https://ww
 - [🖥️ Esquemes de software](#️-esquemes-de-software)
 - [🖧 Esquema de hardware](#-esquema-de-hardware)
 - [🧪 Tests i millores](#-tests-i-milllores)
+- [🫴 Aportacions destacades](#-aportacions-destacades)
 - [🙌 Autors](#-autors)
 - [🤝 Suport](#-suport)
 - [📚 Bibliografía](#-bibliografía)
@@ -182,7 +183,16 @@ pip install -r requirements.txt
 
 ## 🧪 Tests i milllores
   * En aquest projecte s'han fet una serie de tests per tal de comprovar que el funcionament es com esperem que sigui, totes aquestes proves es troben en [Tests](/docs/Tests.pdf)
-  * Per altra banda, en aquest projecte hem tingut en compte unes posibles millores que té l'utilització del robot, tots aquests els hem recopilat en [Millores](/docs/Millores.pdf)  
+  * Per altra banda, en aquest projecte hem tingut en compte unes posibles millores que té l'utilització del robot, tots aquests els hem recopilat en [Millores](/docs/Millores.pdf)
+
+## 🫴 Aportacions destacades
+  * Robot guía per persones visualment discapacitades
+  * Disseny i impressió 3D de components personalitzats 
+  * Integració d'un módel d'inteligencia artificial per reconèixer passos de vianants
+  * Integració d'un módel d'inteligencia artificial per reconèixer objectes
+  * Implementació d’una API al núvol per a la gestió i processament d’imatges
+  * Sistema modular que permet afegir o modificar funcionalitats fàcilment
+  * Tot el codi i módels d'inteligencia artificial implementats son oberts
 
 ## 📚 Bibliografía 
 [Problemas y requisitos en el diseño de un robot de guiado para personas ciegas y mayores](https://publicaciones.asoc-aeim.es/anales/article/view/32/220)

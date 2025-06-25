@@ -4,21 +4,8 @@
 #                                                                                                                      #
 ########################################################################################################################
 
-# Comunicació amb Arduino
-pyserial==3.5
+from .pi_camera import capture_image
 
-# Captura d’imatges amb Picamera2
-picamera2==0.0.5
-
-# Visió per computador (per a processat bàsic local, opcional)
-opencv-python==4.9.0.80
-numpy==1.24.4
-
-# Peticions HTTP a l’API de visió
-requests==2.31.0
-
-# Text-to-Speech de Google Cloud
-google-cloud-texttospeech==2.15.1
-
-# Reproducció d’àudio
-pygame==2.1.3
+__all__ = [
+    "capture_image"
+]

@@ -1,12 +1,12 @@
 // ---------------------------------------- buttons_control.ino
-const int buttonPins[3] = {51, 52, 53};
-int estatActual[3] = {HIGH, HIGH, HIGH};
-int estatAnterior[3] = {HIGH, HIGH, HIGH};
-unsigned long lastPressTime[3] = {0, 0, 0};
-int clickCount[3] = {0, 0, 0};
-unsigned long lastReleaseTime[3] = {0, 0, 0};
-unsigned long holdStartTime[3] = {0, 0, 0};
-int clickState[3] = {0, 0, 0};
+const int buttonPins[3] = { 51, 52, 53 };
+int estatActual[3] = { HIGH, HIGH, HIGH };
+int estatAnterior[3] = { HIGH, HIGH, HIGH };
+unsigned long lastPressTime[3] = { 0, 0, 0 };
+int clickCount[3] = { 0, 0, 0 };
+unsigned long lastReleaseTime[3] = { 0, 0, 0 };
+unsigned long holdStartTime[3] = { 0, 0, 0 };
+int clickState[3] = { 0, 0, 0 };
 
 const long debounceDelay = 50;
 const long doubleClickInterval = 300;
@@ -25,9 +25,9 @@ typedef enum
 } ButtonEvent;
 
 // ---------------------------------------- detect_distances.ino
-const int trigPins[3] = {45, 13, 47};
-const int echoPins[3] = {44, 12, 46};
-const int thresholds[3] = {30, 30, 30};
+const int trigPins[3] = { 45, 13, 47 };
+const int echoPins[3] = { 44, 12, 46 };
+const int thresholds[3] = { 30, 30, 30 };
 
 float distancies[3];
 
@@ -100,27 +100,44 @@ typedef enum {
   ZEBRA_ESPERA,
   ZEBRA_UBICA,
   ZEBRA_AVANCA,
-  APROPAMENT
+  APROPAMENT_SEARCH_PERSON,
+  APROPAMENT_ORIENT_ROBOT,
+  APROPAMENT_FORWARD_TO_OBSTACLE,
+  APROPAMENT_CHECK_ARRIVAL,
+  APROPAMENT_AVOID_OBSTACLE,
 } RobotState;
 
 RobotState estat = ATURAT;
 ButtonEvent button = BUTTON_NONE;
 RobotState giraSeguent = ATURAT;
-float angle=0;
+float angle = 0;
 int instruccio;
+
+// APROPAMENT: variables
+int  scanAngle = angleStartFromFOV();           // angle actual de barrida
+unsigned long lastScanTs = 0;                   // temporitzador de camera
+int  foundAngle = 0;                            // angle relatiu a la persona
+float offset = 0;
+uint16_t bbWidth = 0;                           // bounding‑box
+int  avoidTurnDeg = 0;                          // +90 / –90  (esquerra / dreta)
+bool instructionSent = false;                   // indica si s'ha enviat la instrucció a la Raspberry
 
 const char* robotStateToString(RobotState state) {
   switch (state) {
-    case ATURAT:        return "ATURAT    ";
-    case RECONEIX:      return "RECONEIX  ";
-    case AVANCA:        return "AVANCA    ";
-    case GIRA:          return "GIRA      ";
-    case PETICIO:       return "PETICIO   ";
-    case ZEBRA_ESPERA:  return "ZEB_ESPERA";
-    case ZEBRA_UBICA:   return "ZEB_UBICA ";
-    case ZEBRA_AVANCA:  return "ZEB_AVANCA";
-    case APROPAMENT:    return "APROPAMENT";
-    default:            return "DESCONEGUT";
+  case ATURAT:                      return "ATURAT    ";
+  case RECONEIX:                    return "RECONEIX  ";
+  case AVANCA:                      return "AVANCA    ";
+  case GIRA:                        return "GIRA      ";
+  case PETICIO:                     return "PETICIO   ";
+  case ZEBRA_ESPERA:               return "ZEB_ESPERA";
+  case ZEBRA_UBICA:                return "ZEB_UBICA ";
+  case ZEBRA_AVANCA:               return "ZEB_AVANCA";
+  case APROPAMENT_SEARCH_PERSON:    return "APR_SEARCH";
+  case APROPAMENT_ORIENT_ROBOT:     return "APR_ORIENT";
+  case APROPAMENT_FORWARD_TO_OBSTACLE: return "APR_FORWD";
+  case APROPAMENT_CHECK_ARRIVAL:    return "APR_CHECK ";
+  case APROPAMENT_AVOID_OBSTACLE:   return "APR_AVOID ";
+  default:                          return "DESCONEGUT";
   }
 }
 
@@ -157,186 +174,276 @@ void loop()
   Serial.print(distancies[2]);
   Serial.print(" | Micròfon: ");
   Serial.println(readInput());
-  switch (estat){
+  switch (estat) {
 
     //=====================//
     //       ATURAT        //
     //=====================//
-    case ATURAT:
-      //--------------[ ACCIONS ]--------------
-      stopMotors();
+  case ATURAT:
+    //--------------[ ACCIONS ]--------------
+    stopMotors();
 
-      //-----------[ CANVIS D'ESTAT ]----------
+    //-----------[ CANVIS D'ESTAT ]----------
 
-      // Dos cops de mans
-      if(getTaps())
-      {
-        estat = APROPAMENT;
-        break;
-      }
-
-      // Pulsació al botó central (una o dues vegades)
-      switch (button){
-        case BUTTON1_SINGLE_CLICK:
-          estat = AVANCA;
-          moveForward();
-          break;
-        case BUTTON1_DOUBLE_CLICK:
-          estat = RECONEIX;
-          rotateCamera(PI);
-          sendInstructionToRaspberry(RECONEIX);
-          break;
-      }
-
+    // Dos cops de mans
+    if (getTaps())
+    {
+      estat = APROPAMENT_SEARCH_PERSON;
       break;
+    }
+
+    // Pulsació al botó central (una o dues vegades)
+    switch (button) {
+    case BUTTON1_SINGLE_CLICK:
+      estat = AVANCA;
+      moveForward();
+      break;
+    case BUTTON1_DOUBLE_CLICK:
+      estat = RECONEIX;
+      rotateCamera(PI);
+      sendInstructionToRaspberry(RECONEIX);
+      break;
+    }
+
+    break;
 
     //=====================//
     //      RECONEIX       //
     //=====================//
-    case RECONEIX:
+  case RECONEIX:
 
-      //-----------[ CANVIS D'ESTAT ]----------
+    //-----------[ CANVIS D'ESTAT ]----------
 
-      // La Raspberry retorna el següent codi = Ha acabat correctament
-      if(readInstructionFromRaspberry() == ATURAT)
-      {
-        rotateCamera(-PI);
-        estat = ATURAT;
-        break;
-      }
+    // La Raspberry retorna el següent codi = Ha acabat correctament
+    if (readInstructionFromRaspberry() == ATURAT)
+    {
+      rotateCamera(-PI);
+      estat = ATURAT;
       break;
+    }
+    break;
 
     //=====================//
     //       AVANCA        //
     //=====================//
-    case AVANCA:
-      //--------------[ ACCIONS ]--------------
-      // moveForward();
+  case AVANCA:
+    //--------------[ ACCIONS ]--------------
+    // moveForward();
 
-      //-----------[ CANVIS D'ESTAT ]----------
-      // Detectar parets davant
-      // RevisaObstacles(objectesDetectats);
-      if(objectesDetectats[1])
-      {
-        angle = objectesDetectats[2]? -PI/2 : PI/2;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'haver gir 180º)
-        estat = GIRA;
-        giraSeguent = AVANCA;
-        break;
-      }
-
-      // Pulsació al botó central (una o dues vegades)
-      switch (button){
-        case BUTTON0_LONG_PRESS:
-        case BUTTON2_LONG_PRESS:
-          estat = PETICIO;
-          break;
-        case BUTTON1_SINGLE_CLICK:
-          estat = ATURAT;
-          break;
-        case BUTTON1_DOUBLE_CLICK:
-          estat = RECONEIX;
-          sendInstructionToRaspberry(RECONEIX);
-          break;
-      }
-
-      // Reconeixement de pas de zebra
-      instruccio = readInstructionFromRaspberry();
-      if (instruccio == ZEBRA_UBICA)
-      {
-          estat = ZEBRA_UBICA;
-          break;
-      }
-
+    //-----------[ CANVIS D'ESTAT ]----------
+    // Detectar parets davant
+    // RevisaObstacles(objectesDetectats);
+    if (objectesDetectats[1])
+    {
+      angle = objectesDetectats[2] ? -PI / 2 : PI / 2;  // En cas que la dreta no estigui lliure, gira a l'esquerra (no contemplat cas on hi ha d'haver gir 180º)
+      estat = GIRA;
+      giraSeguent = AVANCA;
       break;
+    }
+
+    // Pulsació al botó central (una o dues vegades)
+    switch (button) {
+    case BUTTON0_LONG_PRESS:
+    case BUTTON2_LONG_PRESS:
+      estat = PETICIO;
+      break;
+    case BUTTON1_SINGLE_CLICK:
+      estat = ATURAT;
+      break;
+    case BUTTON1_DOUBLE_CLICK:
+      estat = RECONEIX;
+      sendInstructionToRaspberry(RECONEIX);
+      break;
+    }
+
+    // Reconeixement de pas de zebra
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == ZEBRA_UBICA)
+    {
+      estat = ZEBRA_UBICA;
+      break;
+    }
+
+    break;
 
     //=====================//
     //      PETICIO       //
     //=====================//
-    case PETICIO:
-      //-----------[ CANVIS D'ESTAT ]----------
-      // RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANCA ja es fa i no fa falta repetir-ho
+  case PETICIO:
+    //-----------[ CANVIS D'ESTAT ]----------
+    // RevisaObstacles(objectesDetectats);  // Es pot treure si veiem que a AVANCA ja es fa i no fa falta repetir-ho
 
-      // Si no es detecten obstacles en la direcció de la PETICIO
-      if((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))
-      {
-        angle = button == BUTTON0_LONG_PRESS? -PI/2 : PI/2;
-        estat = GIRA;
-        giraSeguent = AVANCA;
-        break;
-      }
-      else
-      {
-        estat = AVANCA;
-        moveForward();
-        break;
-      }
+    // Si no es detecten obstacles en la direcció de la PETICIO
+    if ((!objectesDetectats[0] && button == BUTTON0_LONG_PRESS) || (!objectesDetectats[2] && button == BUTTON2_LONG_PRESS))
+    {
+      angle = button == BUTTON0_LONG_PRESS ? -PI / 2 : PI / 2;
+      estat = GIRA;
+      giraSeguent = AVANCA;
       break;
+    }
+    else
+    {
+      estat = AVANCA;
+      moveForward();
+      break;
+    }
+    break;
 
-    
+
     //=====================//
     //        GIRA         //
     //=====================//
-    case GIRA:
-      rotate(angle);
-      estat = giraSeguent;
-      if (estat == AVANCA) moveForward();
-      break;
+  case GIRA:
+    rotate(angle);
+    estat = giraSeguent;
+    if (estat == AVANCA) moveForward();
+    break;
 
     //========================//
     //      ZEBRA_UBICA       //
     //========================//
-    case ZEBRA_UBICA:
+  case ZEBRA_UBICA:
 
-      //-----------[ CANVIS D'ESTAT ]----------
-      instruccio = readInstructionFromRaspberry();
-      if (instruccio == ZEBRA_ESPERA)
-      {
-          estat = ZEBRA_ESPERA;
-          break;
-      }
+    //-----------[ CANVIS D'ESTAT ]----------
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == ZEBRA_ESPERA)
+    {
+      estat = ZEBRA_ESPERA;
       break;
+    }
+    break;
 
     //========================//
     //      ZEBRA_ESPERA      //
     //========================//
-    case ZEBRA_ESPERA:
+  case ZEBRA_ESPERA:
 
-      //-----------[ CANVIS D'ESTAT ]----------
-      instruccio = readInstructionFromRaspberry();
-      if (instruccio == ZEBRA_AVANCA)
-      {
-          estat = ZEBRA_AVANCA;
-          moveForward();
-          break;
-      }
+    //-----------[ CANVIS D'ESTAT ]----------
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == ZEBRA_AVANCA)
+    {
+      estat = ZEBRA_AVANCA;
+      moveForward();
       break;
+    }
+    break;
 
     //========================//
     //      ZEBRA_AVANCA      //
     //========================//
-    case ZEBRA_AVANCA:
-      //--------------[ ACCIONS ]--------------
-      // moveForward();
+  case ZEBRA_AVANCA:
+    //--------------[ ACCIONS ]--------------
+    // moveForward();
 
-      //-----------[ CANVIS D'ESTAT ]----------
-      instruccio = readInstructionFromRaspberry();
-      if (instruccio == AVANCA)
-      {
-          estat = AVANCA;
-          moveForward();
-          break;
-      }
+    //-----------[ CANVIS D'ESTAT ]----------
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == AVANCA)
+    {
+      estat = AVANCA;
+      moveForward();
       break;
+    }
+    break;
 
     //========================//
     //      APROPAMENT        //
     //========================//
-    case APROPAMENT:
-      //--------------[ ACCIONS ]--------------
-      // TODO
+  case APROPAMENT_SEARCH_PERSON:
+    if (!instructionSent) {
+      // Enviem la instrucció a la Raspberry per iniciar la cerca de la persona
+      sendInstructionToRaspberry(APROPAMENT_SEARCH_PERSON);
+      instructionSent = true;
+    }
+    if (hasElapsed(lastScanTs)) {
+      rotateCamera(scanAngle);
+      scanAngle = nextScanAngle(scanAngle);
+      if (hasCompletedScan(scanAngle)) {
+        //No es troba ningú després de fer barrida completa --> torna a ATURAT
+        estat = ATURAT;
+        instructionSent = false;
+        break;
+      }
+      lastScanTs = millis();
+    }
+    estat = APROPAMENT_ORIENT_ROBOT;
+    break;
 
-      //-----------[ CANVIS D'ESTAT ]----------
-      // TODO
+  case APROPAMENT_ORIENT_ROBOT:
+    instruccio = readInstructionFromRaspberry();
+    //tornem a detectar la persona
+    if (instruccio == APROPAMENT_SEARCH_PERSON)
+    {
+      estat = APROPAMENT_SEARCH_PERSON;
+      instructionSent = false;
       break;
+    }
+    offset = readFloatFromRaspberry();
+    if (offset == NAN) {
+      estat = ATURAT;
+      instructionSent = false;
+      break;
+    }
+    foundAngle = offsetToAngle(offset);
+    rotateCameraToCenter();
+    rotate(foundAngle);
+    moveForward();
+    estat = APROPAMENT_FORWARD_TO_OBSTACLE;
+    instructionSent = false;
+    break;
+
+  case APROPAMENT_FORWARD_TO_OBSTACLE:
+    RevisaObstacles(objectesDetectats);
+    if (objectesDetectats[1]) {
+      stopMotors();
+      estat = APROPAMENT_CHECK_ARRIVAL;
+      instructionSent = false;
+    }
+    break;
+
+  case APROPAMENT_CHECK_ARRIVAL:
+    if (!instructionSent) {
+      // Enviem la instrucció a la Raspberry per comprovar si hi ha una persona a prop
+      sendInstructionToRaspberry(APROPAMENT_CHECK_ARRIVAL);
+      instructionSent = true;
+    }
+
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == APROPAMENT_CHECK_ARRIVAL) {
+      // Persona trobada, i a prop. Fi de l'apropament
+      stopMotors();
+      estat = ATURAT;
+      instructionSent = false;
+      rotateCameraToCenter();
+      scanAngle = angleStartFromFOV();
+      rotate(180); // Gira 180º per tornar a la posició inicial
+    }
+    else if (instruccio == APROPAMENT_AVOID_OBSTACLE) {
+      // No es una persona
+      avoidTurnDeg = (objectesDetectats[0] || !objectesDetectats[2]) ? 90 : -90; // preferencia esquerra
+      rotate(avoidTurnDeg);
+      moveForward();
+      estat = APROPAMENT_AVOID_OBSTACLE;
+      instructionSent = false;
+    }
+    break;
+
+  case APROPAMENT_AVOID_OBSTACLE:
+    bool sideClear = (avoidTurnDeg > 0) ? (objectesDetectats[2])
+      : (objectesDetectats[0]);
+    if (sideClear) {
+      stopMotors();
+      // Tornem a buscar la persona
+      scanAngle = angleStartFromFOV();
+      estat = APROPAMENT_SEARCH_PERSON;
+    }
+    else if (objectesDetectats[1]) {
+      // Si hi ha obstacle frontal, intentem girar cap a l'altre costat
+      stopMotors();
+      avoidTurnDeg = (avoidTurnDeg > 0) ? -90 : 90;
+      rotate(avoidTurnDeg);
+      moveForward();
+      estat = APROPAMENT_FORWARD_TO_OBSTACLE;
+    }
+    break;
   }
 }

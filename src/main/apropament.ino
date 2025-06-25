@@ -1,56 +1,24 @@
-// const uint8_t CAMERA_FOV_DEG = 120;  // amplitud total (+-60°)
-// const uint8_t CAMERA_STEP_DEG = 10;   // step degree
-// const uint8_t PERSON_CLOSE_PERC = 80;   // bounding‑box >= 80 % ample imatge
-// const uint16_t CAMERA_SETTLE_MS = 120;  // Temps minim entre captures
-// const uint16_t FRAME_WIDTH = 640; // Ample de la imatge de la càmera
-
-// int cameraCurrentAngle = 0;
+const uint8_t CAMERA_FOV_DEG = 120;  // amplitud total (+-60°)
+const uint8_t CAMERA_STEP_DEG = 10;   // step degree
+const uint16_t CAMERA_SETTLE_MS = 500;  // Temps minim entre captures
 
 
+int angleStartFromFOV() {
+    return -(CAMERA_FOV_DEG / 2);
+}
 
-// // ----------------------
-// // PROPOSTA DE FUNCIONS
-// // ----------------------
+bool hasElapsed(unsigned long lastTime) {
+    return millis() - lastTime >= CAMERA_SETTLE_MS;
+}
 
-// // Canviar ???
-// void rotateCamera(int angle) {
+int nextScanAngle(int currentAngle) {
+    return currentAngle + CAMERA_STEP_DEG;
+}
 
-//     int delta = angle - cameraCurrentAngle;
+bool hasCompletedScan(int angle) {
+    return angle > (CAMERA_FOV_DEG / 2);
 
-//     if (delta != 0) {
-//         stepper_rotateDegrees(delta);
-//         cameraCurrentAngle = angle;
-//     }
-// }
-
-// void rotateCameraToCenter() {
-//     rotateCamera(0);
-// }
-
-// bool detectPerson(int& angleOut, uint16_t& bbWidth) {
-//     return false; //FALTA IMPLEMENTACIO
-// }
-
-// bool isPersonCloseEnough(uint16_t bbWidth) {
-//     return ((bbWidth * 100UL) / FRAME_WIDTH) >= PERSON_CLOSE_PERC;
-// }
-
-// int angleStartFromFOV() {
-//     return -(CAMERA_FOV_DEG / 2);
-// }
-
-// bool hasElapsed(unsigned long lastTime) {
-//     return millis() - lastTime >= CAMERA_SETTLE_MS;
-// }
-
-// int nextScanAngle(int currentAngle) {
-//     return currentAngle + CAMERA_STEP_DEG;
-// }
-
-// bool hasCompletedScan(int angle) {
-//     return angle > (CAMERA_FOV_DEG / 2);
-// }
-
-// uint16_t getCameraFrameWidth() {
-//     return FRAME_WIDTH;
-// }
+    float offsetToAngle(int offset, int resolution = 640, float fov = 62.0) {
+        return (offset / (resolution / 2.0)) * (fov / 2.0);
+    }
+}

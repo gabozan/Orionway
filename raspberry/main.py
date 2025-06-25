@@ -4,13 +4,19 @@
 #                                                                                                                      #
 ########################################################################################################################
 
+import time
 from enum import IntEnum
 from ArduinoIO import ArduinoIO
-import time
-import random
+from camera_utils import capture_image
+from crosswalk import detect_crosswalk, run_zebrai
+from object_recognition import detect_object_in_hand, announce_object
+from person_interaction import detect_person_info
 
 # ==================================================================================================================== #
 
+# ----------------------------------------------------------------------
+# Definim els estats del robot
+# ----------------------------------------------------------------------
 class RobotState(IntEnum):
     ATURAT = 0
     RECONEIX = 1
@@ -20,62 +26,214 @@ class RobotState(IntEnum):
     ZEBRA_ESPERA = 5
     ZEBRA_UBICA = 6
     ZEBRA_AVANCA = 7
-    APROPAMENT = 8
+    APROPAMENT_SEARCH_PERSON = 8
+    APROPAMENT_ORIENT_ROBOT = 9
+    APROPAMENT_FORWARD_TO_OBSTACLE = 10
+    APROPAMENT_CHECK_ARRIVAL = 11
+    APROPAMENT_AVOID_OBSTACLE = 12
+
 
 # ==================================================================================================================== #
 
-estat = RobotState.ATURAT
-gira_seguent = RobotState.ATURAT
-arduino = ArduinoIO()
 
-# ==================================================================================================================== #
+def main():
+    img_path = "./tmp/current.jpg"
+    arduino = ArduinoIO()
+    estat = RobotState.ATURAT
+    estat_ant = None
 
-def getTaps():
-    return random.choice([False, False, False, True])
+    # Variables per controlar la freqüència de detecció de zebra
+    last_zebra_check_time = 0.0
+    zebra_check_interval = 3.0
 
-def get_buttons():
-    return random.choice(["NONE", "BUTTON1_SINGLE_CLICK"])
+    # Variables per controlar la freqüència de captura de fotos
+    last_capture_time = 0.0
+    photo_interval = 1.5
 
-def stop_motors():
-    arduino.send_instruction(RobotState.ATURAT.value)
+    # Variables per detectar persona
+    last_person_check_time = 0.0
+    person_check_interval = 1.5
+    last_person = {'detected': False, 'x_offset': 0.0, 'is_close': False}
 
-def executar_avanca():
-    arduino.send_instruction(RobotState.AVANCA.value)
+    # Variables per controlar la freqüència de enviament dels float
+    last_offset_sent = None
+    last_offset_time = 0.0
+    offset_interval = 1.0
+    offset_threshold = 0.05
 
-# ==================================================================================================================== #
-
-def loop():
-    global estat
     try:
+        print("Iniciant el bucle principal...")
         while True:
-            print(f"Estat actual: {estat.name}")
+            current_time = time.time()
+            # Llegim instrucció de l'Arduino
+            code = arduino.read_instruction()
+            if code != -1:
+                try:
+                    estat = RobotState(code)
+                    print(f"Rebut codi de l'Arduino: {estat.name} ({code})")
+                except ValueError:
+                    print(f"Codi desconegut rebut: {code}")
 
+            # Control de freqüència de captura de fotos
+            if current_time - last_capture_time >= photo_interval:
+                capture_image(img_path)
+                last_capture_time = current_time
+
+            ############################################################################################################
             if estat == RobotState.ATURAT:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.ATURAT.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.RECONEIX:
+                obj = detect_object_in_hand(img_path)
+                announce_object(obj)
                 arduino.send_instruction(RobotState.ATURAT.value)
-                if getTaps():
-                    estat = RobotState.APROPAMENT
-
+                estat = RobotState.ATURAT
+            ############################################################################################################
             elif estat == RobotState.AVANCA:
-                executar_avanca()
-                btn = get_buttons()
-                if btn != "NONE":
-                    estat = RobotState.PETICIO
+                if current_time - last_zebra_check_time >= zebra_check_interval:
+                    cross = detect_crosswalk(img_path)
+                    last_zebra_check_time = current_time
+                else:
+                    cross = {"zebra": False}
 
-            elif estat == RobotState.PETICIO:
-                stop_motors()
-                btn = get_buttons()
-                if btn == "BUTTON1_SINGLE_CLICK":
+                if cross.get("zebra", False):
+                    print("Zebra detectada, canviant a ZEBRA_UBICA")
+                    arduino.send_instruction(RobotState.ZEBRA_UBICA.value)
+                    estat = RobotState.ZEBRA_UBICA
+                else:
+                    if estat != estat_ant:
+                        arduino.send_instruction(RobotState.AVANCA.value)
+                        estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.ZEBRA_UBICA:
+                print("Ubicant zebra. S'executa ZEBRAI")
+                run_zebrai(img_path)
+                arduino.send_instruction(RobotState.ZEBRA_ESPERA.value)
+                estat = RobotState.ZEBRA_ESPERA
+            ############################################################################################################
+            elif estat == RobotState.ZEBRA_ESPERA:
+                if current_time - last_zebra_check_time >= zebra_check_interval:
+                    cross = detect_crosswalk(img_path)
+                    last_zebra_check_time = current_time
+                else:
+                    cross = {"traffic_light": "red"}
+                zebra_lights = cross.get("traffic_light", None)
+                if zebra_lights == "green" or zebra_lights is None:
+                    print("Pas de zebra segur, avancem. Seguint ZEBRA_AVANCA")
+                    arduino.send_instruction(RobotState.ZEBRA_AVANCA.value)
+                    estat = RobotState.ZEBRA_AVANCA
+                else:
+                    if estat != estat_ant:
+                        arduino.send_instruction(RobotState.ZEBRA_ESPERA.value)
+                        estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.ZEBRA_AVANCA:
+                if current_time - last_zebra_check_time >= zebra_check_interval:
+                    cross = detect_crosswalk(img_path)
+                    last_zebra_check_time = current_time
+                else:
+                    cross = {"zebra": True}
+                zebra = cross.get("zebra", False)
+                if not zebra:
+                    print("Creuament completat. Tornant a AVANCA")
+                    arduino.send_instruction(RobotState.AVANCA.value)
                     estat = RobotState.AVANCA
                 else:
-                    estat = RobotState.ATURAT
-            time.sleep(0.5)
+                    if estat != estat_ant:
+                        arduino.send_instruction(RobotState.ZEBRA_AVANCA.value)
+                        estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.PETICIO:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.PETICIO.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.GIRA:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.GIRA.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_SEARCH_PERSON:
+                if current_time - last_person_check_time >= person_check_interval:
+                    person = detect_person_info(img_path)
+                    last_person_check_time = current_time
+                    last_person = person
+                else:
+                    person = last_person
+
+                if not person.get('detected', False):
+                    print("Cap persona detectada. Enviant SEARCH_PERSON")
+                    arduino.send_instruction(RobotState.APROPAMENT_SEARCH_PERSON.value)
+                    estat = RobotState.APROPAMENT_SEARCH_PERSON # Tornem a detectar amb una nova imatge
+                else:
+                    offset = person.get('x_offset', 0.0)
+                    close = person.get('is_close', False)
+                    if close:
+                        print("Persona a prop. Enviant CHECK_ARRIVAL")
+                        arduino.send_instruction(RobotState.APROPAMENT_CHECK_ARRIVAL.value)
+                        estat = RobotState.ATURAT 
+                    else:
+                        if (last_offset_sent is None or
+                                abs(offset - last_offset_sent) > offset_threshold or
+                                current_time - last_offset_time >= offset_interval):
+                            print(f"Persona detectada amb offset {offset:.2f}. Ajustant trajectòria")
+                            arduino.send_instruction(RobotState.APROPAMENT_ORIENT_ROBOT.value)
+                            arduino.send_float(offset)
+                            last_offset_sent = offset
+                            last_offset_time = current_time
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_ORIENT_ROBOT:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_ORIENT_ROBOT.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_FORWARD_TO_OBSTACLE:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_FORWARD_TO_OBSTACLE.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_CHECK_ARRIVAL:
+                person = detect_person_info(img_path)
+                last_person_check_time = current_time
+                last_person = person
+
+                if not person.get('detected', False):
+                    print("Cap persona detectada. Enviant AVOID_OBSTACLE")
+                    arduino.send_instruction(RobotState.APROPAMENT_AVOID_OBSTACLE.value)
+                    estat = RobotState.APROPAMENT_AVOID_OBSTACLE # es tracta d'un obstacle
+                else:
+                    offset = person.get('x_offset', 0.0)
+                    close = person.get('is_close', False)
+                    if close:
+                        print("Persona a prop. Enviant ATURAT")
+                        arduino.send_instruction(RobotState.APROPAMENT_CHECK_ARRIVAL.value)
+                        estat = RobotState.ATURAT
+                    else:
+                        print("Persona no a prop i no es un obstacle. No hauria de passar mai. Tornant a ATURAT")
+                        arduino.send_instruction(RobotState.ATURAT.value)
+                        estat = RobotState.ATURAT
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_AVOID_OBSTACLE:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_AVOID_OBSTACLE.value)
+                    estat_ant = estat
+            ############################################################################################################
+            else:
+                print(f"Estat desconegut: {estat}. Tornant a ATURAT.")
+                arduino.send_instruction(RobotState.ATURAT.value)
+                estat = RobotState.ATURAT
+            ############################################################################################################
+            time.sleep(0.1)
 
     except KeyboardInterrupt:
-        print("\nInterrupcio")
+        print("\nInterrupció per teclat.")
     finally:
         arduino.close()
-        print("Port tancat correctament")
+        print("Sortida i tancament completat.")
 
 
 if __name__ == "__main__":
-    loop()
+    main()
+

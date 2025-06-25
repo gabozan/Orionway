@@ -101,16 +101,20 @@ bool instructionSent = false;                   // indica si s'ha enviat la inst
 
 const char* robotStateToString(RobotState state) {
   switch (state) {
-  case ATURAT:        return "ATURAT    ";
-  case RECONEIX:      return "RECONEIX  ";
-  case AVANCA:        return "AVANCA    ";
-  case GIRA:          return "GIRA      ";
-  case PETICIO:       return "PETICIO   ";
-  case ZEBRA_ESPERA:  return "ZEB_ESPERA";
-  case ZEBRA_UBICA:   return "ZEB_UBICA ";
-  case ZEBRA_AVANCA:  return "ZEB_AVANCA";
-  case APROPAMENT:    return "APROPAMENT";
-  default:            return "DESCONEGUT";
+    case ATURAT:                      return "ATURAT    ";
+    case RECONEIX:                    return "RECONEIX  ";
+    case AVANCA:                      return "AVANCA    ";
+    case GIRA:                        return "GIRA      ";
+    case PETICIO:                     return "PETICIO   ";
+    case ZEBRA_ESPERA:               return "ZEB_ESPERA";
+    case ZEBRA_UBICA:                return "ZEB_UBICA ";
+    case ZEBRA_AVANCA:               return "ZEB_AVANCA";
+    case APROPAMENT_SEARCH_PERSON:    return "APR_SEARCH";
+    case APROPAMENT_ORIENT_ROBOT:     return "APR_ORIENT";
+    case APROPAMENT_FORWARD_TO_OBSTACLE: return "APR_FORWD";
+    case APROPAMENT_CHECK_ARRIVAL:    return "APR_CHECK ";
+    case APROPAMENT_AVOID_OBSTACLE:   return "APR_AVOID ";
+    default:                          return "DESCONEGUT";
   }
 }
 
@@ -418,6 +422,5 @@ void loop()
     }
     break;
   }
-  break;
   }
 }

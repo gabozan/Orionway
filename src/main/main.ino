@@ -77,7 +77,11 @@ typedef enum {
   ZEBRA_ESPERA,
   ZEBRA_UBICA,
   ZEBRA_AVANCA,
-  APROPAMENT
+  APROPAMENT_SEARCH_PERSON,
+  APROPAMENT_ORIENT_ROBOT,
+  APROPAMENT_FORWARD_TO_OBSTACLE,
+  APROPAMENT_CHECK_ARRIVAL,
+  APROPAMENT_AVOID_OBSTACLE,
 } RobotState;
 
 RobotState estat = ATURAT;
@@ -86,20 +90,14 @@ RobotState giraSeguent = ATURAT;
 float angle = 0;
 int instruccio;
 
-// APROPAMENT: variables i subestats
-enum ApropSubState : uint8_t {
-  SEARCH_PERSON,
-  ORIENT_ROBOT,
-  FORWARD_TO_OBSTACLE,
-  CHECK_ARRIVAL,
-  AVOID_OBSTACLE
-};
-ApropSubState subState = SEARCH_PERSON;         // subestat
+// APROPAMENT: variables
 int  scanAngle = angleStartFromFOV();           // angle actual de barrida
 unsigned long lastScanTs = 0;                   // temporitzador de camera
 int  foundAngle = 0;                            // angle relatiu a la persona
+float offset = 0;
 uint16_t bbWidth = 0;                           // bounding‑box
 int  avoidTurnDeg = 0;                          // +90 / –90  (esquerra / dreta)
+bool instructionSent = false;                   // indica si s'ha enviat la instrucció a la Raspberry
 
 const char* robotStateToString(RobotState state) {
   switch (state) {
@@ -160,7 +158,7 @@ void loop()
     // Dos cops de mans
     if (getTaps())
     {
-      estat = APROPAMENT;
+      estat = APROPAMENT_SEARCH_PERSON;
       break;
     }
 
@@ -318,85 +316,108 @@ void loop()
     //========================//
     //      APROPAMENT        //
     //========================//
-  case APROPAMENT:
-  {
-    switch (subState) {
+  case APROPAMENT_SEARCH_PERSON:
 
-    case SEARCH_PERSON:
-      if (hasElapsed(lastScanTs)) {
-        rotateCamera(scanAngle);
-        if (detectPerson(foundAngle, bbWidth)) {
-          rotateCameraToCenter();
-          subState = ORIENT_ROBOT;
-        }
-        else {
-          scanAngle = nextScanAngle(scanAngle);
-          if (hasCompletedScan(scanAngle)) {
-            //No es troba ningú --> torna a ATURAT
-            estat = ATURAT;
-          }
-        }
-        lastScanTs = millis();
+    if (!instructionSent) {
+      // Enviem la instrucció a la Raspberry per iniciar la cerca de la persona
+      sendInstructionToRaspberry(APROPAMENT_SEARCH_PERSON);
+      instructionSent = true;
+    }
+    if (hasElapsed(lastScanTs)) {
+      rotateCamera(scanAngle);
+      scanAngle = nextScanAngle(scanAngle);
+      if (hasCompletedScan(scanAngle)) {
+        //No es troba ningú --> torna a ATURAT
+        estat = ATURAT;
+        instructionSent = false;
+        break;
       }
-      break;
+      lastScanTs = millis();
+    }
+    estat = APROPAMENT_ORIENT_ROBOT;
+    break;
 
-    case ORIENT_ROBOT:
-      rotate(foundAngle);
-      rotateCameraToCenter();
-      moveForward();
-      subState = FORWARD_TO_OBSTACLE;
-      break;
-
-    case FORWARD_TO_OBSTACLE:
-      RevisaObstacles(objectesDetectats);
-      if (objectesDetectats[1]) {
-        stopMotors();
-        subState = CHECK_ARRIVAL;
-      }
-      break;
-
-    case CHECK_ARRIVAL:
+  case APROPAMENT_ORIENT_ROBOT:
+    instruccio = readInstructionFromRaspberry();
+    //tornem a intentar detectar la persona
+    if (instruccio == APROPAMENT_SEARCH_PERSON)
     {
-      if (detectPerson(foundAngle, bbWidth)) {
-        const uint16_t frameW = getCameraFrameWidth();
-        if (isPersonCloseEnough(bbWidth)) {
-          // Persona trobada
-          estat = ATURAT;
-          subState = SEARCH_PERSON;
-          scanAngle = angleStartFromFOV();
-          rotate(180);
-          break;
-        }
-      }
+      estat = APROPAMENT_SEARCH_PERSON;
+      instructionSent = false;
+      break;
+    }
+    offset = readFloatFromRaspberry();
+    if (offset == NAN) {
+      estat = ATURAT;
+      instructionSent = false;
+      break;
+    }
+    foundAngle = offsetToAngle(offset);
+    rotateCameraToCenter();
+    rotate(foundAngle);
+    moveForward();
+    estat = APROPAMENT_FORWARD_TO_OBSTACLE;
+    instructionSent = false;
+    break;
+
+  case APROPAMENT_FORWARD_TO_OBSTACLE:
+    RevisaObstacles(objectesDetectats);
+    if (objectesDetectats[1]) {
+      stopMotors();
+      estat = APROPAMENT_CHECK_ARRIVAL;
+      instructionSent = false;
+    }
+    break;
+
+  case APROPAMENT_CHECK_ARRIVAL:
+  {
+    if (!instructionSent) {
+      // Enviem la instrucció a la Raspberry per comprovar si hi ha una persona a prop
+      sendInstructionToRaspberry(APROPAMENT_CHECK_ARRIVAL);
+      instructionSent = true;
+    }
+
+    instruccio = readInstructionFromRaspberry();
+    if (instruccio == APROPAMENT_CHECK_ARRIVAL) {
+      // Persona trobada, i a prop. Fi de l'apropament
+      stopMotors();
+      estat = ATURAT;
+      instructionSent = false;
+      rotateCameraToCenter();
+      scanAngle = angleStartFromFOV();
+      rotate(180); // Gira 180º per tornar a la posició inicial
+    }
+    else if (instruccio == APROPAMENT_AVOID_OBSTACLE) {
       // No es una persona
       avoidTurnDeg = (objectesDetectats[0] || !objectesDetectats[2]) ? 90 : -90; // preferencia esquerra
       rotate(avoidTurnDeg);
       moveForward();
-      subState = AVOID_OBSTACLE;
-      break;
+      estat = APROPAMENT_AVOID_OBSTACLE;
+      instructionSent = false;
     }
-
-    case AVOID_OBSTACLE:
-    {
-      bool sideClear = (avoidTurnDeg > 0) ? (objectesDetectats[2])
-        : (objectesDetectats[0]);
-      if (sideClear) {
-        stopMotors();
-        // Tornem a buscar la persona
-        scanAngle = angleStartFromFOV();
-        subState = SEARCH_PERSON;
-      }
-      else if (objectesDetectats[1]) {
-        stopMotors();
-        avoidTurnDeg = (avoidTurnDeg > 0) ? -90 : 90;
-        rotate(avoidTurnDeg);
-        moveForward();
-      }
-      break;
-    }
-    }
+    break;
   }
 
+  case APROPAMENT_AVOID_OBSTACLE:
+  {
+    bool sideClear = (avoidTurnDeg > 0) ? (objectesDetectats[2])
+      : (objectesDetectats[0]);
+    if (sideClear) {
+      stopMotors();
+      // Tornem a buscar la persona
+      scanAngle = angleStartFromFOV();
+      estat = APROPAMENT_SEARCH_PERSON;
+    }
+    else if (objectesDetectats[1]) {
+      // Si hi ha obstacle frontal, intentem girar cap a l'altre costat
+      stopMotors();
+      avoidTurnDeg = (avoidTurnDeg > 0) ? -90 : 90;
+      rotate(avoidTurnDeg);
+      moveForward();
+      estat = APROPAMENT_FORWARD_TO_OBSTACLE;
+    }
+    break;
+  }
   break;
   }
 }

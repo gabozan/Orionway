@@ -26,7 +26,11 @@ class RobotState(IntEnum):
     ZEBRA_ESPERA = 5
     ZEBRA_UBICA = 6
     ZEBRA_AVANCA = 7
-    APROPAMENT = 8
+    APROPAMENT_SEARCH_PERSON = 8
+    APROPAMENT_ORIENT_ROBOT = 9
+    APROPAMENT_FORWARD_TO_OBSTACLE = 10
+    APROPAMENT_CHECK_ARRIVAL = 11
+    APROPAMENT_AVOID_OBSTACLE = 12
 
 
 # ==================================================================================================================== #
@@ -151,7 +155,7 @@ def main():
                     arduino.send_instruction(RobotState.GIRA.value)
                     estat_ant = estat
             ############################################################################################################
-            elif estat == RobotState.APROPAMENT:
+            elif estat == RobotState.APROPAMENT_SEARCH_PERSON:
                 if current_time - last_person_check_time >= person_check_interval:
                     person = detect_person_info(img_path)
                     last_person_check_time = current_time
@@ -160,25 +164,61 @@ def main():
                     person = last_person
 
                 if not person.get('detected', False):
-                    print("Cap persona detectada. Enviant ATURAT")
-                    arduino.send_instruction(RobotState.ATURAT.value)
-                    estat = RobotState.ATURAT
+                    print("Cap persona detectada. Enviant SEARCH_PERSON")
+                    arduino.send_instruction(RobotState.APROPAMENT_SEARCH_PERSON.value)
+                    estat = RobotState.APROPAMENT_SEARCH_PERSON # Tornem a detectar amb una nova imatge
                 else:
                     offset = person.get('x_offset', 0.0)
                     close = person.get('is_close', False)
                     if close:
-                        print("Persona a prop. Enviant ATURAT")
-                        arduino.send_instruction(RobotState.ATURAT.value)
-                        estat = RobotState.ATURAT
+                        print("Persona a prop. Enviant CHECK_ARRIVAL")
+                        arduino.send_instruction(RobotState.APROPAMENT_CHECK_ARRIVAL.value)
+                        estat = RobotState.ATURAT 
                     else:
                         if (last_offset_sent is None or
                                 abs(offset - last_offset_sent) > offset_threshold or
                                 current_time - last_offset_time >= offset_interval):
                             print(f"Persona detectada amb offset {offset:.2f}. Ajustant trajectòria")
-                            arduino.send_instruction(RobotState.APROPAMENT.value)
+                            arduino.send_instruction(RobotState.APROPAMENT_ORIENT_ROBOT.value)
                             arduino.send_float(offset)
                             last_offset_sent = offset
                             last_offset_time = current_time
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_ORIENT_ROBOT:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_ORIENT_ROBOT.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_FORWARD_TO_OBSTACLE:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_FORWARD_TO_OBSTACLE.value)
+                    estat_ant = estat
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_CHECK_ARRIVAL:
+                person = detect_person_info(img_path)
+                last_person_check_time = current_time
+                last_person = person
+
+                if not person.get('detected', False):
+                    print("Cap persona detectada. Enviant AVOID_OBSTACLE")
+                    arduino.send_instruction(RobotState.APROPAMENT_AVOID_OBSTACLE.value)
+                    estat = RobotState.APROPAMENT_AVOID_OBSTACLE # es tracta d'un obstacle
+                else:
+                    offset = person.get('x_offset', 0.0)
+                    close = person.get('is_close', False)
+                    if close:
+                        print("Persona a prop. Enviant ATURAT")
+                        arduino.send_instruction(RobotState.APROPAMENT_CHECK_ARRIVAL.value)
+                        estat = RobotState.ATURAT
+                    else:
+                        print("Persona no a prop i no es un obstacle. No hauria de passar mai. Tornant a ATURAT")
+                        arduino.send_instruction(RobotState.ATURAT.value)
+                        estat = RobotState.ATURAT
+            ############################################################################################################
+            elif estat == RobotState.APROPAMENT_AVOID_OBSTACLE:
+                if estat != estat_ant:
+                    arduino.send_instruction(RobotState.APROPAMENT_AVOID_OBSTACLE.value)
+                    estat_ant = estat
             ############################################################################################################
             else:
                 print(f"Estat desconegut: {estat}. Tornant a ATURAT.")

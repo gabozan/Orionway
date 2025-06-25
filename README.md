@@ -48,12 +48,12 @@ Si voleu conèixer més la seva història: [Article de La Vanguardia](https://ww
 - [🎥 Video demostració](#-video-demostració)
 - [💫 Funcionalitats del robot OrionWay](#-funcionalitats-del-robot-orionway)
 - [⚙️ Arquitectura i hardware](#️-arquitectura-i-hardware)
-- [📋 Requisits i instalació](#requisits-i-instalació)
+- [🤯 Aportacions destacades](#-aportacions-destacades-amazing-contributions)
 - [🖥️ Esquemes de software](#️-esquemes-de-software)
 - [🖧 Esquema de hardware](#-esquema-de-hardware)
+- [📋 Requisits i instalació](#requisits-i-instalació)
 - [🧪 Tests i millores](#-tests-i-milllores)
-- [🫴 Aportacions destacades](#-aportacions-destacades)
-- [📚 Bibliografía](#-bibliografía)
+- [📚 Bibliografia i recursos](#-bibliografia-i-recursos)
 - [📄 Llicència](#-llicència)
 
 ## 🎥 Video demostració
@@ -82,14 +82,14 @@ Respecte als components hem utilitzat el següent:
  * Motor pas a pas 28BYJ-48 [Datasheet](https://www.mouser.com/datasheet/2/758/stepd-01-data-sheet-1143075.pdf)
  * Driver motor pas a pas ULN2003 [Datasheet](https://www.ti.com/lit/ds/symlink/uln2003a.pdf)
  * Motor 12V 455A105 [Datasheet](https://octopart.com/es/datasheet/455a105-2-globe+motors-19929790)
- * E2 optical encoder[Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
+ * E2 optical encoder [Datasheet](https://www.usdigital.com/datasheets/e2-datasheet.pdf)
  * Sensor d'ultrasons HC-SR04 [Datasheet](https://leantec.es/wp-content/uploads/2019/06/Leantec.ES-HC-SR04.pdf)
 
 Hem realitzar impressions 3D del següent:
 
 | ![](assets/dissenys%203D/Mango.gif) | ![](assets/dissenys%203D/SoporteCamara.gif) | ![](assets/dissenys%203D/SoporteMotorPasoAPaso.gif) |
 |-------------------------------------|----------------------------------------------|------------------------------------------------------|
-| [Mànec](3D%20designs/Mango.stl)     | [Suport Càmera](3D%20designs/SoporteCamara.stl) |[Suport Motor Pas a Pas](3D%20designs/SoporteMotorPasoAPaso.stl)|
+| [***Mànec***](3D%20designs/Mango.stl)     | [***Suport Càmera***](3D%20designs/SoporteCamara.stl) |[***Suport Motor Pas a Pas***](3D%20designs/SoporteMotorPasoAPaso.stl)|
 
 
 
@@ -103,6 +103,15 @@ Hem realitzar impressions 3D del següent:
 
 ### 🖧 Esquema de hardware
   ![](hardware/esquema.png)
+
+## 🤯 Aportacions destacades (Amazing contributions)
+* Robot guia intel·ligent per a persones amb discapacitat visual.
+* Disseny i impressió 3D de components personalitzats i funcionals.
+* Reconeixement avançat de passos de vianants amb semàfor mitjançant visió per computador clàsica i moderna.
+* Identificació *on-demand* d’objectes particulars amb resposta per veu.
+* API al núvol per a un processament d’imatges ràpid i escalable.
+* Arquitectura modular i adaptable a noves funcionalitats.
+* Codi i models d’intel·ligència artificial 100% oberts i reutilitzables.
 
 ## 📋Requisits i instalació
 - **Python**: 3.10 
@@ -183,19 +192,10 @@ pip install -r requirements.txt
   * En aquest projecte s'han fet una serie de tests per tal de comprovar que el funcionament es com esperem que sigui, totes aquestes proves es troben en [Tests](/docs/Tests.pdf)
   * Per altra banda, en aquest projecte hem tingut en compte unes posibles millores que té l'utilització del robot, tots aquests els hem recopilat en [Millores](/docs/Millores.pdf)
 
-## 🫴 Aportacions destacades
-  * Robot guía per persones visualment discapacitades
-  * Disseny i impressió 3D de components personalitzats 
-  * Integració d'un módel d'inteligencia artificial per reconèixer passos de vianants
-  * Integració d'un módel d'inteligencia artificial per reconèixer objectes
-  * Implementació d’una API al núvol per a la gestió i processament d’imatges
-  * Sistema modular que permet afegir o modificar funcionalitats fàcilment
-  * Tot el codi i módels d'inteligencia artificial implementats son oberts
-
-## 📚 Bibliografía 
-[Problemas y requisitos en el diseño de un robot de guiado para personas ciegas y mayores](https://publicaciones.asoc-aeim.es/anales/article/view/32/220)
-
-[Una revisión de sistemas asistenciales basados en visión para personas con discapacidad visual: tecnologías, aplicaciones y direcciones futuras.](https://chatpaper.com/es/chatpaper/paper/138956)
+## 📚 Bibliografia i recursos
+* [*Problemas y requisitos en el diseño de un robot de guiado para personas ciegas y mayores*](https://publicaciones.asoc-aeim.es/anales/article/view/32/220)
+* [*Una revisión de sistemas asistenciales basados en visión para personas con discapacidad visual: tecnologías, aplicaciones y direcciones futuras.*](https://chatpaper.com/es/chatpaper/paper/138956)
+* [*Documentació oficial d'Arduino*](https://docs.arduino.cc/language-reference/)
 
 ### 📄 Llicència
   Aquest projecte està llicenciat sota la Llicència MIT.

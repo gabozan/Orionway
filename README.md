@@ -186,6 +186,17 @@ pip install -r requirements.txt
 cd raspberry
 pip install -r requirements.txt
 ```
+
+#### 4. Obre el projecte a l'IDE d'Arduino i puja'l a la placa
+
+```bash
+cd arduino
+```
+
+1. Obre l'arxiu main.ino amb l’IDE d’Arduino (fes doble clic o obre’l des del menú de l'IDE).
+2. A l'IDE, selecciona la teva placa i tria el port corresponent.
+3. Compila per pujar el codi a la placa.
+
 ---
 
 ## 🧪 Tests i milllores

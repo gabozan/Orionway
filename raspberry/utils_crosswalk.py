@@ -5,6 +5,11 @@ import itertools
 from sklearn.cluster import DBSCAN
 import random
 
+class TimeoutException(Exception):
+    pass
+
+def timeout_handler(signum, frame):
+    raise TimeoutException("Execució superada (timeout)")
 
 def get_intersection(l1, l2):
     rho1, theta1 = l1

@@ -8,6 +8,7 @@ from api_client import detect_zebrai
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import signal
 from utils_crosswalk import *
 # ==================================================================================================================== #
 
@@ -44,9 +45,12 @@ def detect_crosswalk(image_path: str) -> dict:
 
 def run_zebrai(image_path: str) -> float:
     
+    
     img = plt.imread(image_path)
     gray = to_uint8(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
     try:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(2)  # Timeout de 20 segons
         src = noise_filter(gray)
         thr = find_threshold(src)
         if not (0 <= thr <= 255):
@@ -66,3 +70,6 @@ def run_zebrai(image_path: str) -> float:
         
     except:
         return 0.0
+    
+    finally:
+        signal.alarm(0)

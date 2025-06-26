@@ -193,7 +193,7 @@ pip install -r requirements.txt
 cd arduino
 ```
 
-1. Obre l'arxiu main.ino amb l’IDE d’Arduino (fes doble clic o obre’l des del menú de l'IDE).
+1. Obre l'arxiu main.ino amb l’IDE d’Arduino.
 2. A l'IDE, selecciona la teva placa i tria el port corresponent.
 3. Compila per pujar el codi a la placa.
 

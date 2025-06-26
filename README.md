@@ -57,6 +57,10 @@ Si voleu conèixer més la seva història: [Article de La Vanguardia](https://ww
 - [📄 Llicència](#-llicència)
 
 ## 🎥 Video demostració
+<a href="https://www.youtube.com/watch?v=D7q8VTSx6Zk">
+  <img src="assets/thumbnail.jpg" width="480">
+</a>
+
 
 ## 💫 Funcionalitats del robot OrionWay
 

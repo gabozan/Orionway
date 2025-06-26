@@ -3,7 +3,7 @@
 </p>
 
 # OrionWay:  El guia robot per a trobar el teu camí 🤖👨‍🦯
-![Python](https://img.shields.io/badge/Python-254f71?style=for-the-badge&logo=python&logoColor=254f71&labelColor=FFD43B)&nbsp;&nbsp;![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
+![Python](https://img.shields.io/badge/Python-254f71?style=for-the-badge&logo=python&logoColor=254f71&labelColor=FFD43B)&nbsp;&nbsp;![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)&nbsp;&nbsp;![Cloud](https://img.shields.io/badge/Google%20Cloud-4285F4?logo=google-cloud&logoColor=white&style=for-the-badge)
 
 OrionWay és un **robot guia** dissenyat per acompanyar persones amb **discapacitat visual** en **entorns segurs**, com el campus de la Universitat Autònoma de Barcelona (UAB).
 

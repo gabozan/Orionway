@@ -17,8 +17,8 @@ int nextScanAngle(int currentAngle) {
 
 bool hasCompletedScan(int angle) {
     return angle > (CAMERA_FOV_DEG / 2);
+}
 
-    float offsetToAngle(int offset, int resolution = 640, float fov = 62.0) {
-        return (offset / (resolution / 2.0)) * (fov / 2.0);
-    }
+float offsetToAngle(int offset, int resolution = 640, float fov = 62.0) {
+    return (offset / (resolution / 2.0)) * (fov / 2.0);
 }

@@ -1,3 +1,8 @@
+int angleStartFromFOV();
+float offsetToAngle(int offset, int resolution = 640, float fov = 62.0);
+// void rotateCameraToCenter(); 
+
+
 // ---------------------------------------- buttons_control.ino
 const int buttonPins[3] = { 51, 52, 53 };
 int estatActual[3] = { HIGH, HIGH, HIGH };
@@ -392,7 +397,7 @@ void loop()
     break;
 
   case APROPAMENT_FORWARD_TO_OBSTACLE:
-    RevisaObstacles(objectesDetectats);
+    RevisaObstacles();
     if (objectesDetectats[1]) {
       stopMotors();
       estat = APROPAMENT_CHECK_ARRIVAL;
